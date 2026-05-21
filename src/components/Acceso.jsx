@@ -1,0 +1,122 @@
+import { useState } from 'react';
+import { api } from '../lib/api.js';
+
+/* Pantalla de entrada en 2 pasos:
+ *  1. Código de la porra (familia / amigos).
+ *  2. Usuario + PIN: registrarse (primera vez) o entrar (ya existe).
+ */
+export default function Acceso({ alEntrar }) {
+  const [paso, setPaso] = useState(1);
+  const [codigo, setCodigo] = useState('');
+  const [porra, setPorra] = useState(null);
+  const [fases, setFases] = useState([]);
+  const [modo, setModo] = useState('entrar');
+  const [usuario, setUsuario] = useState('');
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
+
+  async function validarCodigo() {
+    setError(''); setCargando(true);
+    try {
+      const r = await api.acceso(codigo.trim());
+      setPorra(r.porra);
+      setFases(r.fases);
+      setPaso(2);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  async function identificarse() {
+    setError(''); setCargando(true);
+    try {
+      const r =
+        modo === 'registrar'
+          ? await api.registrar(codigo.trim(), usuario, pin)
+          : await api.entrar(codigo.trim(), usuario, pin);
+      alEntrar({ codigo: codigo.trim(), porra, fases, jugador: r.jugador });
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  return (
+    <div className="tarjeta">
+      {paso === 1 && (
+        <>
+          <h2>Entra a tu porra</h2>
+          <p className="aviso info">
+            Introduce el código que te ha pasado el organizador. Cada grupo
+            (familia o amigos) tiene el suyo.
+          </p>
+          <label>Código de la porra</label>
+          <input
+            value={codigo}
+            onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+            placeholder="EJ: FAMILIA2026"
+            onKeyDown={(e) => e.key === 'Enter' && validarCodigo()}
+          />
+          {error && <div className="aviso error">{error}</div>}
+          <button className="btn fila" onClick={validarCodigo} disabled={cargando}>
+            {cargando ? 'Comprobando…' : 'Continuar'}
+          </button>
+        </>
+      )}
+
+      {paso === 2 && (
+        <>
+          <h2>Porra: {porra.nombre}</h2>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+            <button
+              className={'btn ' + (modo === 'entrar' ? '' : 'secundario')}
+              onClick={() => setModo('entrar')}
+            >
+              Ya juego
+            </button>
+            <button
+              className={'btn ' + (modo === 'registrar' ? '' : 'secundario')}
+              onClick={() => setModo('registrar')}
+            >
+              Primera vez
+            </button>
+          </div>
+
+          <label>Tu nombre</label>
+          <input
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value)}
+            placeholder="Como te conoce la gente"
+          />
+
+          <label>Tu PIN {modo === 'registrar' && '(elige uno, 3-6 dígitos)'}</label>
+          <input
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="••••"
+            inputMode="numeric"
+            onKeyDown={(e) => e.key === 'Enter' && identificarse()}
+          />
+          <p className="aviso info">
+            {modo === 'registrar'
+              ? 'Apunta tu PIN: lo necesitarás para editar tu pronóstico más adelante.'
+              : 'Usa el mismo nombre y PIN con los que te registraste.'}
+          </p>
+
+          {error && <div className="aviso error">{error}</div>}
+          <button className="btn fila" onClick={identificarse} disabled={cargando}>
+            {cargando
+              ? 'Un momento…'
+              : modo === 'registrar'
+              ? 'Crear y entrar'
+              : 'Entrar'}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
