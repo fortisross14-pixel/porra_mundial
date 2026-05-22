@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import Acceso from './components/Acceso.jsx';
 import Pronostico from './components/Pronostico.jsx';
-import Clasificacion from './components/Clasificacion.jsx';
+import CuadroHonor from './components/CuadroHonor.jsx';
+import Resultados from './components/Resultados.jsx';
 import Admin from './components/Admin.jsx';
 
-/* Cabecera: logo a la izquierda + "Porra Mundial" / "Mundial 2026".
- * El logo se carga desde /logo.png (pon el archivo en public/).
- * Si no existe, se muestra un recuadro con las iniciales "PM".
- */
+/* Cabecera: logo a la izquierda + "Porra Mundial" / "Mundial 2026". */
 function Barra() {
   const [logoFalla, setLogoFalla] = useState(false);
   return (
@@ -15,12 +13,8 @@ function Barra() {
       {logoFalla ? (
         <div className="logo-fallback">PM</div>
       ) : (
-        <img
-          className="logo"
-          src="/logo.png"
-          alt="Logo"
-          onError={() => setLogoFalla(true)}
-        />
+        <img className="logo" src="/logo.png" alt="Logo"
+          onError={() => setLogoFalla(true)} />
       )}
       <div className="titulos">
         <h1>Porra Mundial</h1>
@@ -35,7 +29,6 @@ export default function App() {
   const [vista, setVista] = useState('pronostico');
   const [faseId, setFaseId] = useState(null);
 
-  // Si la URL es /admin, se muestra la pantalla de administración.
   const esAdmin = typeof window !== 'undefined' &&
     window.location.pathname.replace(/\/$/, '') === '/admin';
 
@@ -52,6 +45,12 @@ export default function App() {
       </>
     );
   }
+
+  const tabs = [
+    ['pronostico', 'Mi pronóstico'],
+    ['cuadro', 'Cuadro de honor'],
+    ['resultados', 'Resultados'],
+  ];
 
   return (
     <>
@@ -73,29 +72,22 @@ export default function App() {
                 <span>
                   <strong>{sesion.porra.nombre}</strong> · {sesion.jugador.usuario}
                 </span>
-                <div style={{ display: 'flex', gap: 6 }}>
+              </div>
+              <div className="pestanas" style={{ marginTop: 12, marginBottom: 0 }}>
+                {tabs.map(([id, txt]) => (
                   <button
-                    className={'btn ' + (vista === 'pronostico' ? '' : 'secundario')}
-                    onClick={() => setVista('pronostico')}
-                  >
-                    Mi pronóstico
-                  </button>
-                  <button
-                    className={'btn ' + (vista === 'clasificacion' ? '' : 'secundario')}
-                    onClick={() => setVista('clasificacion')}
-                  >
-                    Clasificación
-                  </button>
-                </div>
+                    key={id}
+                    className={'pestana ' + (vista === id ? 'activa' : '')}
+                    onClick={() => setVista(id)}
+                  >{txt}</button>
+                ))}
               </div>
 
               {sesion.fases.length > 1 && (
                 <>
                   <label>Fase</label>
-                  <select
-                    value={fase?.id}
-                    onChange={(e) => setFaseId(Number(e.target.value))}
-                  >
+                  <select value={fase?.id}
+                    onChange={(e) => setFaseId(Number(e.target.value))}>
                     {sesion.fases.map((f) => (
                       <option key={f.id} value={f.id}>{f.nombre}</option>
                     ))}
@@ -105,7 +97,8 @@ export default function App() {
             </div>
 
             {fase && vista === 'pronostico' && <Pronostico sesion={sesion} fase={fase} />}
-            {fase && vista === 'clasificacion' && <Clasificacion sesion={sesion} fase={fase} />}
+            {fase && vista === 'cuadro' && <CuadroHonor sesion={sesion} fase={fase} />}
+            {fase && vista === 'resultados' && <Resultados sesion={sesion} fase={fase} />}
           </>
         )}
 

@@ -1,63 +1,48 @@
 /* =============================================================
- *  PUNTUACIÓN  —  ARCHIVO DE CONFIGURACIÓN DE PUNTOS
+ *  PUNTUACIÓN  —  LÓGICA DE CÁLCULO DE PUNTOS
  * =============================================================
  *
- *  Este es el ÚNICO archivo que necesitas tocar para cambiar
- *  cómo se reparten los puntos. La lógica del juego lee de aquí.
- *  No hace falta entender el resto del código para ajustar esto.
+ *  IMPORTANTE: los VALORES de los puntos ya NO se editan aquí.
+ *  Se editan desde el panel de administración (pestaña "Puntos"),
+ *  y se guardan en la base de datos (tabla valores_puntos).
  *
- *  Lo usan tanto el frontend (para mostrar puntos en vivo) como
- *  el backend (para calcular la tabla final). Por eso vive en la
- *  raíz y se importa desde los dos lados.
+ *  Este archivo solo contiene:
+ *   1. La LÓGICA de cálculo (cómo se cuentan los puntos).
+ *   2. Los valores POR DEFECTO, que sirven solo para:
+ *      - rellenar la base de datos la primera vez (schema_v2.sql)
+ *      - usarse como respaldo si la BD no devuelve un valor.
+ *
+ *  Las conceptos son: '1x2', 'exacto', 'clasificado'.
+ *  Las rondas: 'grupos','dieciseisavos','octavos','cuartos',
+ *              'semifinal','final','tercer_puesto'.
  * ============================================================= */
 
-export const PUNTUACION = {
-
-  /* ---------- FASE DE GRUPOS: aciertos por partido ---------- */
-  // Puntos por acertar el resultado 1X2 (gana local / empate / gana visitante).
-  ACIERTO_1X2: 1,
-
-  // Puntos EXTRA (adicionales) por acertar el marcador exacto.
-  // Un marcador exacto da ACIERTO_1X2 + EXTRA_MARCADOR_EXACTO.
-  // Con los valores por defecto: marcador exacto = 1 + 2 = 3 puntos.
-  EXTRA_MARCADOR_EXACTO: 2,
-
-  /* ---------- BONUS POR POSICIÓN EN LA TABLA ---------- */
-  // Cantidad FIJA por cada equipo que quede en la posición EXACTA
-  // que el jugador predijo dentro de su grupo.
-  // Ej: si aciertas las 4 posiciones de un grupo -> 4 puntos.
-  //     si solo aciertas el 1º y los otros 3 están cambiados -> 1 punto.
-  BONUS_POR_POSICION_GRUPO: 1,
-
-  // Lo mismo pero para la clasificación cruzada de los 12 terceros.
-  // Por cada tercero que el jugador coloque en su posición exacta
-  // dentro del ranking de terceros, suma esta cantidad.
-  BONUS_POR_POSICION_TERCEROS: 1,
-
-  /* ---------- FASE ELIMINATORIA (se rellena más adelante) ---------- */
-  // Estos valores se usan cuando el admin abra la fase eliminatoria.
-  // Puntos por acertar el equipo que pasa de ronda en cada cruce.
-  ELIM_ACIERTO_CLASIFICADO: 3,
-
-  // Puntos por acertar el marcador exacto de un cruce eliminatorio.
-  ELIM_MARCADOR_EXACTO: 2,
-
-  // Multiplicador opcional por ronda. La eliminatoria suma SIEMPRE
-  // sobre el total acumulado (un solo ganador al final del torneo).
-  // Pon 1 en todas si no quieres que las rondas valgan distinto.
-  ELIM_MULTIPLICADOR_RONDA: {
-    'dieciseisavos': 1, // Ronda de 32
-    'octavos': 1,
-    'cuartos': 1,
-    'semifinal': 1,
-    'final': 1,
-  },
+// Valores por defecto. Reflejan lo que hay en schema_v2.sql.
+// 'exacto' es el extra que se suma ADEMÁS del 1x2.
+export const VALORES_DEFECTO = {
+  grupos:        { '1x2': 1, exacto: 2, clasificado: 1 },
+  dieciseisavos: { '1x2': 1, exacto: 2, clasificado: 3 },
+  octavos:       { '1x2': 1, exacto: 2, clasificado: 3 },
+  cuartos:       { '1x2': 1, exacto: 2, clasificado: 3 },
+  semifinal:     { '1x2': 1, exacto: 2, clasificado: 3 },
+  final:         { '1x2': 1, exacto: 2 },
+  tercer_puesto: { '1x2': 1, exacto: 2 },
 };
 
-/* =============================================================
- *  FUNCIONES DE CÁLCULO
- *  (normalmente no hace falta editar esto; solo los valores de arriba)
- * ============================================================= */
+export const VALOR_CUADRO_HONOR_DEFECTO = 10;
+
+// Convierte las filas de la tabla valores_puntos en un objeto
+// { ronda: { concepto: puntos } }. Si falta algo, usa el defecto.
+export function valoresDesdeFilas(filas) {
+  const v = JSON.parse(JSON.stringify(VALORES_DEFECTO));
+  for (const f of filas || []) {
+    if (!v[f.ronda]) v[f.ronda] = {};
+    v[f.ronda][f.concepto] = f.puntos;
+  }
+  return v;
+}
+
+/* ---------------- LÓGICA DE CÁLCULO ---------------- */
 
 // Devuelve 'L' (gana local), 'E' (empate) o 'V' (gana visitante).
 export function resultado1X2(golesLocal, golesVisitante) {
@@ -66,50 +51,40 @@ export function resultado1X2(golesLocal, golesVisitante) {
   return 'E';
 }
 
-// Puntos de un partido de grupos: compara la predicción con el resultado real.
-// Devuelve 0 si el 1X2 falla; ACIERTO_1X2 si acierta el 1X2;
-// ACIERTO_1X2 + EXTRA_MARCADOR_EXACTO si además el marcador es exacto.
-export function puntosPartidoGrupo(pred, real) {
-  if (!pred || !real) return 0;
-  if (pred.local == null || pred.visitante == null) return 0;
-  if (real.local == null || real.visitante == null) return 0;
+// Puntos de un partido. `valoresRonda` = { '1x2': n, 'exacto': n }.
+// Devuelve { puntos, tipo } donde tipo es 'exacto' | '1x2' | 'fallo'.
+export function puntosPartido(pred, real, valoresRonda) {
+  const v = valoresRonda || VALORES_DEFECTO.grupos;
+  if (!pred || !real) return { puntos: 0, tipo: 'fallo' };
+  if (pred.local == null || pred.visitante == null) return { puntos: 0, tipo: 'fallo' };
+  if (real.local == null || real.visitante == null) return { puntos: 0, tipo: 'fallo' };
 
   const aciertoSigno =
     resultado1X2(pred.local, pred.visitante) ===
     resultado1X2(real.local, real.visitante);
+  if (!aciertoSigno) return { puntos: 0, tipo: 'fallo' };
 
-  if (!aciertoSigno) return 0;
-
-  const marcadorExacto =
-    pred.local === real.local && pred.visitante === real.visitante;
-
-  return marcadorExacto
-    ? PUNTUACION.ACIERTO_1X2 + PUNTUACION.EXTRA_MARCADOR_EXACTO
-    : PUNTUACION.ACIERTO_1X2;
+  const exacto = pred.local === real.local && pred.visitante === real.visitante;
+  if (exacto) {
+    return { puntos: (v['1x2'] || 0) + (v.exacto || 0), tipo: 'exacto' };
+  }
+  return { puntos: v['1x2'] || 0, tipo: '1x2' };
 }
 
-// Bonus por posiciones de un grupo: recibe el orden predicho y el real
-// (arrays de códigos de equipo, de 1º a 4º). Suma BONUS_POR_POSICION_GRUPO
-// por cada equipo en su posición exacta.
-export function puntosPosicionesGrupo(ordenPredicho, ordenReal) {
-  if (!ordenPredicho || !ordenReal) return 0;
-  let puntos = 0;
-  for (let i = 0; i < ordenReal.length; i++) {
-    if (ordenPredicho[i] && ordenPredicho[i] === ordenReal[i]) {
-      puntos += PUNTUACION.BONUS_POR_POSICION_GRUPO;
-    }
-  }
-  return puntos;
+// Compat: versión antigua usada por el cálculo de la fase de grupos.
+export function puntosPartidoGrupo(pred, real, valoresRonda) {
+  return puntosPartido(pred, real, valoresRonda).puntos;
 }
 
-// Igual que la anterior pero para el ranking de los 12 terceros.
-export function puntosPosicionesTerceros(ordenPredicho, ordenReal) {
+// Bonus por posiciones de un grupo. Suma el valor 'clasificado'
+// de la ronda por cada equipo en su posición exacta.
+export function puntosPosiciones(ordenPredicho, ordenReal, puntoPorPosicion) {
   if (!ordenPredicho || !ordenReal) return 0;
-  let puntos = 0;
+  let p = 0;
   for (let i = 0; i < ordenReal.length; i++) {
     if (ordenPredicho[i] && ordenPredicho[i] === ordenReal[i]) {
-      puntos += PUNTUACION.BONUS_POR_POSICION_TERCEROS;
+      p += puntoPorPosicion || 0;
     }
   }
-  return puntos;
+  return p;
 }

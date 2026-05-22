@@ -103,6 +103,29 @@ export default function Pronostico({ sesion, fase }) {
 
   if (cargando) return <div className="tarjeta">Cargando tu pronóstico…</div>;
 
+  // La fase eliminatoria todavía no tiene pantalla de pronóstico
+  // (se construye en la Parte 2). Mientras tanto, se muestra como
+  // bloqueada o "próximamente" según la haya abierto el organizador.
+  const esEliminatoria = /eliminatoria/i.test(fase.nombre || '');
+  if (esEliminatoria) {
+    return (
+      <div className="tarjeta">
+        <h2>{fase.nombre}</h2>
+        {fase.abierta ? (
+          <p className="aviso info">
+            La fase eliminatoria está abierta. La pantalla para rellenar
+            tu cuadro estará disponible muy pronto.
+          </p>
+        ) : (
+          <p className="aviso info">
+            La fase eliminatoria aún no está disponible. Se abrirá cuando
+            termine la fase de grupos.
+          </p>
+        )}
+      </div>
+    );
+  }
+
   if (sinDatos) {
     return (
       <div className="tarjeta">

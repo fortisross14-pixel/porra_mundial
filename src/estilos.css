@@ -329,3 +329,210 @@ input:focus, select:focus {
   .partido .lado { font-size: 13px; }
   .tarjeta { padding: 16px; }
 }
+
+/* ---- Modal / popup ---- */
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 16, 20, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+}
+.modal-caja {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 540px;
+  width: 100%;
+  max-height: 86vh;
+  overflow-y: auto;
+  border: 1px solid var(--borde);
+}
+.modal-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--borde);
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
+.modal-cerrar {
+  border: none;
+  background: #f1f2f4;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.modal-cerrar:hover { background: #e3e5e9; }
+.modal-cuerpo { padding: 20px; }
+
+/* ---- Tabla de puntos (ayuda / admin) ---- */
+.tabla-puntos { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla-puntos th, .tabla-puntos td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--borde);
+  text-align: center;
+}
+.tabla-puntos th {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--texto-tenue);
+}
+.tabla-puntos td:first-child, .tabla-puntos th:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+.tabla-puntos input {
+  width: 56px;
+  text-align: center;
+  padding: 6px;
+}
+
+/* ---- Botón de ayuda ---- */
+.btn-ayuda {
+  border: 1px solid var(--borde);
+  background: #fff;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--azul);
+  font-size: 13px;
+}
+.btn-ayuda:hover { background: #f1f2f4; }
+
+/* ---- Bloque de peligro (borrar) ---- */
+.zona-peligro {
+  border: 1px solid var(--acento);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+  background: #fdf3f3;
+}
+
+/* ---- Tabla de ranking con dos bloques ---- */
+.tabla-ranking { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla-ranking th {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texto-tenue);
+  padding: 7px 6px;
+  text-align: center;
+  border-bottom: 2px solid var(--borde);
+}
+.tabla-ranking th.izq { text-align: left; }
+.tabla-ranking th.bloque {
+  color: var(--azul);
+  border-bottom: 2px solid var(--azul);
+  font-weight: 700;
+}
+.tabla-ranking td {
+  padding: 10px 6px;
+  text-align: center;
+  border-bottom: 1px solid var(--borde);
+}
+.tabla-ranking td.izq { text-align: left; }
+.tabla-ranking td.pos {
+  font-family: var(--titular);
+  font-weight: 700;
+  color: var(--texto-tenue);
+}
+.tabla-ranking tr:first-child td.pos { color: var(--dorado); }
+.tabla-ranking td.total {
+  font-family: var(--titular);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--azul);
+}
+.tabla-ranking tr.fila-click { cursor: pointer; }
+.tabla-ranking tr.fila-click:hover td { background: #f1f2f4; }
+
+/* ---- Cuadrícula de resultados diarios ---- */
+.cuadricula-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.cuadricula {
+  border-collapse: collapse;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.cuadricula th, .cuadricula td {
+  padding: 9px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--borde);
+}
+.cuadricula th {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--texto-tenue);
+  border-bottom: 2px solid var(--borde);
+}
+/* Columna de nombre: congelada a la izquierda al hacer scroll */
+.cuadricula .col-nombre {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  text-align: left;
+  font-weight: 600;
+  min-width: 116px;
+  box-shadow: 2px 0 0 var(--borde);
+  z-index: 1;
+}
+.cuadricula thead .col-nombre { background: #fff; z-index: 2; }
+.cuadricula .col-pts {
+  font-family: var(--titular);
+  font-weight: 700;
+  color: var(--azul);
+}
+/* Fila del resultado real, destacada */
+.cuadricula .fila-real td {
+  background: #eef0fb;
+  font-weight: 700;
+  border-bottom: 2px solid var(--azul);
+}
+.cuadricula .fila-real .col-nombre {
+  background: #eef0fb;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+/* ---- Cruce del cuadro eliminatorio (admin) ---- */
+.cruce {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borde);
+  flex-wrap: wrap;
+}
+.cruce:last-child { border-bottom: none; }
+.cruce-id {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-tenue);
+  background: #f1f2f4;
+  border-radius: 5px;
+  padding: 3px 7px;
+  min-width: 42px;
+  text-align: center;
+}
+.cruce-vs {
+  color: var(--texto-tenue);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.cruce select { width: auto; padding: 8px 10px; }

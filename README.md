@@ -89,3 +89,65 @@ El panel permite:
   abierta se puede editar; al cerrarla se bloquea y se muestra la
   clasificación. La fecha límite es solo orientativa, no bloquea sola.
 - **Resultados**: introducir el marcador real de los 72 partidos.
+
+## Actualización v2 (Batch A)
+
+Antes de usar las funciones nuevas, ejecuta `db/schema_v2.sql` en la
+consola de Prisma, paso a paso (PASO V2-1 ... V2-5). Es aditivo y
+seguro: crea tablas nuevas sin tocar las existentes.
+
+Novedades:
+- Los valores de puntos ahora se editan desde el panel de admin
+  (pestaña "Puntos"), no desde el código.
+- Panel de admin: pestaña "Porras" para borrar una porra duplicada.
+- Las tablas del admin muestran el CÓDIGO de cada porra.
+- Botón de ayuda (?) en la clasificación: abre los valores de puntos.
+
+## Arreglar fases duplicadas (una vez)
+
+Si la tabla `fases` tiene filas repetidas (por haber ejecutado dos
+veces los inserts), deja una fase por porra y borra el resto, p.ej.:
+  DELETE FROM fases WHERE id IN (3, 4);
+Comprueba antes con: SELECT * FROM fases ORDER BY porra_id, id;
+
+## Actualización v2 (Batch B)
+
+Pantallas nuevas para los jugadores:
+- Pestaña "Resultados" con 3 sub-pestañas: resultados reales del
+  Mundial por grupo, "Resultados diarios" (cuadrícula: jugadores en
+  filas, partidos en columnas, marcador previsto en cada celda con
+  color verde/azul/negro segun el acierto) y "Clasificación total".
+- Las tablas de ranking tienen dos bloques de columnas: Grupos y
+  Fase final, con 1X2 / Exacto / Posición bajo cada uno.
+- Al tocar un jugador se abre un popup con su desglose por partido.
+- Pestaña "Cuadro de honor": 6 campos de texto (Campeón, Subcampeón,
+  3.º, 4.º, Máximo goleador, Mejor jugador).
+
+Recuerda: las columnas de "Fase final" quedan a 0 hasta que se
+construya la fase eliminatoria. El bonus por posición de grupo
+aparece cuando un grupo tiene todos sus resultados cargados.
+
+## Pendiente
+
+- Fase eliminatoria (predicción del cuadro + sus columnas de ranking).
+- Cálculo del bonus por posición de grupo y validación del cuadro de
+  honor desde el admin.
+
+## Fase eliminatoria — Parte 1
+
+Antes de usarla, ejecuta `db/schema_v3.sql` paso a paso en Prisma.
+Añade la "Fase Eliminatoria" (cerrada) a cada porra y la tabla del
+cuadro. La fase ya existe siempre; no hay que crearla.
+
+Flujo:
+1. La fase eliminatoria aparece cerrada. Los jugadores ven la
+   pestaña pero bloqueada.
+2. Cuando termine la fase de grupos e introduzcas todos los
+   resultados, ve a Admin -> pestaña "Cuadro" -> "Proponer
+   dieciseisavos". Autocompleta los 16 cruces.
+3. Revisa y AJUSTA cualquier equipo (terceros empatados, etc.).
+   Cada hueco es un desplegable editable. Guarda el cuadro.
+4. Cuando esté listo, abre la fase en Admin -> "Fases".
+
+La pantalla donde los jugadores rellenan su cuadro se construye en
+la Parte 2 (junto con las columnas de Fase final del ranking).

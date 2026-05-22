@@ -70,4 +70,38 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ accion: 'fase', faseId, abierta }),
     }),
+
+  adminGuardarPuntos: (valores, cuadroHonor) =>
+    pedir('/api/admin', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'guardarPuntos', valores, cuadroHonor }),
+    }),
+
+  adminBorrarPorra: (porraId) =>
+    pedir('/api/admin', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'borrarPorra', porraId }),
+    }),
+
+  puntos: () => pedir('/api/puntos'),
+
+  ranking: (codigo, faseId) =>
+    pedir(`/api/ranking?codigo=${encodeURIComponent(codigo)}&faseId=${faseId}`),
+
+  cargarCuadroHonor: (codigo, jugadorId) =>
+    pedir(`/api/cuadro-honor?codigo=${encodeURIComponent(codigo)}&jugadorId=${jugadorId}`),
+
+  guardarCuadroHonor: (codigo, jugadorId, respuestas) =>
+    pedir('/api/cuadro-honor', {
+      method: 'POST',
+      body: JSON.stringify({ codigo, jugadorId, respuestas }),
+    }),
+
+  cargarCuadro: () => pedir('/api/cuadro'),
+
+  guardarCuadro: (huecos) =>
+    pedir('/api/cuadro', {
+      method: 'POST',
+      body: JSON.stringify({ huecos }),
+    }),
 };
