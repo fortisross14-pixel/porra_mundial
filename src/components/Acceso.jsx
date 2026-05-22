@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { api } from '../lib/api.js';
 
 /* Pantalla de entrada en 2 pasos:
- *  1. Código de la porra (familia / amigos).
- *  2. Usuario + PIN: registrarse (primera vez) o entrar (ya existe).
+ *  1. Código de la porra.
+ *  2. Usuario + PIN: "Nueva porra" (registrarse) o "Modificar porra" (entrar).
  */
 export default function Acceso({ alEntrar }) {
   const [paso, setPaso] = useState(1);
   const [codigo, setCodigo] = useState('');
   const [porra, setPorra] = useState(null);
   const [fases, setFases] = useState([]);
-  const [modo, setModo] = useState('entrar');
+  const [modo, setModo] = useState('entrar'); // 'entrar' = modificar, 'registrar' = nueva
   const [usuario, setUsuario] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
@@ -52,7 +52,7 @@ export default function Acceso({ alEntrar }) {
           <h2>Entra a tu porra</h2>
           <p className="aviso info">
             Introduce el código que te ha pasado el organizador. Cada grupo
-            (familia o amigos) tiene el suyo.
+            tiene el suyo.
           </p>
           <label>Código de la porra</label>
           <input
@@ -71,18 +71,18 @@ export default function Acceso({ alEntrar }) {
       {paso === 2 && (
         <>
           <h2>Porra: {porra.nombre}</h2>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
             <button
               className={'btn ' + (modo === 'entrar' ? '' : 'secundario')}
               onClick={() => setModo('entrar')}
             >
-              Ya juego
+              Modificar porra
             </button>
             <button
               className={'btn ' + (modo === 'registrar' ? '' : 'secundario')}
               onClick={() => setModo('registrar')}
             >
-              Primera vez
+              Nueva porra
             </button>
           </div>
 
@@ -103,8 +103,8 @@ export default function Acceso({ alEntrar }) {
           />
           <p className="aviso info">
             {modo === 'registrar'
-              ? 'Apunta tu PIN: lo necesitarás para editar tu pronóstico más adelante.'
-              : 'Usa el mismo nombre y PIN con los que te registraste.'}
+              ? 'Apunta tu PIN: lo necesitarás para modificar tu porra más adelante.'
+              : 'Usa el mismo nombre y PIN con los que creaste tu porra.'}
           </p>
 
           {error && <div className="aviso error">{error}</div>}
@@ -114,6 +114,13 @@ export default function Acceso({ alEntrar }) {
               : modo === 'registrar'
               ? 'Crear y entrar'
               : 'Entrar'}
+          </button>
+          <button
+            className="btn secundario fila"
+            style={{ marginTop: 8 }}
+            onClick={() => { setPaso(1); setError(''); }}
+          >
+            ← Cambiar de porra
           </button>
         </>
       )}

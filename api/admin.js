@@ -1,25 +1,31 @@
 /* POST /api/admin
- *  Acciones reservadas al administrador (Oscar). Protegidas por
- *  ADMIN_CODE, una variable de entorno secreta de Vercel.
+ *  Acciones de administrador. Protegidas por la cookie de sesión
+ *  (no por el código: el código solo se usó una vez al hacer login).
  *
  *  Campo "accion":
- *   'resultado'   -> guardar/actualizar el marcador real de un partido
- *   'fase'        -> abrir/cerrar una fase o cambiar su fecha límite
- *   'crearFase'   -> crear la Fase Eliminatoria cuando acaben los grupos
+ *   'resultado' -> guardar/actualizar el marcador real de un partido
+ *   'fase'      -> abrir o cerrar una fase (bloqueo manual)
+ *   'crearFase' -> crear una fase nueva (ej. la eliminatoria)
  */
-import { sql, esAdmin, leerCuerpo, error } from './_lib/helpers.js';
+import { sql, leerCuerpo, error, sesionAdminValida } from './_lib/helpers.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return error(res, 405, 'Método no permitido');
 
+  // Toda acción de admin exige una sesión válida.
+  if (!sesionAdminValida(req)) {
+    return error(res, 401, 'Sesión de administrador no válida o caducada');
+  }
+
   try {
     const cuerpo = leerCuerpo(req);
-    if (!esAdmin(cuerpo.adminCode)) return error(res, 403, 'Acceso de admin denegado');
-
     const { accion } = cuerpo;
 
     if (accion === 'resultado') {
       const { partidoId, golesLocal, golesVisitante } = cuerpo;
+      if (golesLocal == null || golesVisitante == null) {
+        return error(res, 400, 'Faltan los goles');
+      }
       await sql`
         INSERT INTO resultados (partido_id, goles_local, goles_visitante, actualizado)
         VALUES (${partidoId}, ${golesLocal}, ${golesVisitante}, now())
@@ -32,18 +38,13 @@ export default async function handler(req, res) {
     }
 
     if (accion === 'fase') {
-      const { faseId, abierta, fechaLimite } = cuerpo;
-      await sql`
-        UPDATE fases
-        SET abierta = COALESCE(${abierta}, abierta),
-            fecha_limite = COALESCE(${fechaLimite}, fecha_limite)
-        WHERE id = ${faseId}
-      `;
+      // Bloqueo/desbloqueo manual de una fase.
+      const { faseId, abierta } = cuerpo;
+      await sql`UPDATE fases SET abierta = ${abierta} WHERE id = ${faseId}`;
       return res.status(200).json({ ok: true });
     }
 
     if (accion === 'crearFase') {
-      // Crea una fase nueva (ej. la eliminatoria) en TODAS las porras.
       const { nombre, fechaLimite } = cuerpo;
       const { rows: porras } = await sql`SELECT id FROM porras`;
       for (const p of porras) {

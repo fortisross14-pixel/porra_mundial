@@ -83,7 +83,8 @@ CREATE INDEX idx_jug_porra ON jugadores (porra_id);
 -- -------------------------------------------------------------
 INSERT INTO porras (nombre, codigo) VALUES
   ('Familia', 'FAMILIA2026'),
-  ('Amigos',  'AMIGOS2026');
+  ('Amigos',  'AMIGOS2026'),
+  ('Pruebas', 'PRUEBAS2026');
 
 -- Crea la Fase de Grupos para cada porra.
 -- AJUSTA fecha_limite a la hora del primer partido del Mundial.

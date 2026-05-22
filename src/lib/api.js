@@ -3,6 +3,7 @@
 async function pedir(url, opciones) {
   const r = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // necesario para enviar/recibir la cookie de sesión
     ...opciones,
   });
   const datos = await r.json().catch(() => ({}));
@@ -40,4 +41,33 @@ export const api = {
     pedir(
       `/api/clasificacion?codigo=${encodeURIComponent(codigo)}&faseId=${faseId}`
     ),
+
+  /* ---- Administración ---- */
+  adminEstado: () => pedir('/api/admin-login'),
+
+  adminEntrar: (codigo) =>
+    pedir('/api/admin-login', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'entrar', codigo }),
+    }),
+
+  adminSalir: () =>
+    pedir('/api/admin-login', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'salir' }),
+    }),
+
+  adminDatos: () => pedir('/api/admin-datos'),
+
+  adminGuardarResultado: (partidoId, golesLocal, golesVisitante) =>
+    pedir('/api/admin', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'resultado', partidoId, golesLocal, golesVisitante }),
+    }),
+
+  adminCambiarFase: (faseId, abierta) =>
+    pedir('/api/admin', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'fase', faseId, abierta }),
+    }),
 };

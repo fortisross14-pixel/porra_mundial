@@ -1,60 +1,73 @@
 /* =============================================================
  *  PARTIDOS Y GRUPOS  -  FASE DE GRUPOS DEL MUNDIAL 2026
- *  Generado a partir del calendario oficial.
  *  72 partidos, 12 grupos (A-L), 48 equipos.
- *  La 'fecha' es la hora local de la sede.
+ *  'fecha' = hora local de la sede.
+ *  EQUIPOS guarda nombre y codigo ISO para la bandera (flagcdn).
  * ============================================================= */
 
+// code -> { nombre, iso }. El iso se usa para la bandera de flagcdn.
 export const EQUIPOS = {
-  'MEX': 'México',
-  'RSA': 'Sudáfrica',
-  'KOR': 'Corea del Sur',
-  'CZE': 'Chequia',
-  'CAN': 'Canadá',
-  'BIH': 'Bosnia y Herzegovina',
-  'USA': 'Estados Unidos',
-  'PAR': 'Paraguay',
-  'HAI': 'Haití',
-  'SCO': 'Escocia',
-  'AUS': 'Australia',
-  'TUR': 'Turquía',
-  'BRA': 'Brasil',
-  'MAR': 'Marruecos',
-  'QAT': 'Catar',
-  'SUI': 'Suiza',
-  'CIV': 'Costa de Marfil',
-  'ECU': 'Ecuador',
-  'GER': 'Alemania',
-  'CUW': 'Curazao',
-  'NED': 'Países Bajos',
-  'JPN': 'Japón',
-  'SWE': 'Suecia',
-  'TUN': 'Túnez',
-  'KSA': 'Arabia Saudí',
-  'URU': 'Uruguay',
-  'ESP': 'España',
-  'CPV': 'Cabo Verde',
-  'IRN': 'Irán',
-  'NZL': 'Nueva Zelanda',
-  'BEL': 'Bélgica',
-  'EGY': 'Egipto',
-  'FRA': 'Francia',
-  'SEN': 'Senegal',
-  'IRQ': 'Irak',
-  'NOR': 'Noruega',
-  'ARG': 'Argentina',
-  'ALG': 'Argelia',
-  'AUT': 'Austria',
-  'JOR': 'Jordania',
-  'GHA': 'Ghana',
-  'PAN': 'Panamá',
-  'ENG': 'Inglaterra',
-  'CRO': 'Croacia',
-  'POR': 'Portugal',
-  'COD': 'RD Congo',
-  'UZB': 'Uzbekistán',
-  'COL': 'Colombia',
+  'MEX': { nombre: 'México', iso: 'mx' },
+  'RSA': { nombre: 'Sudáfrica', iso: 'za' },
+  'KOR': { nombre: 'Corea del Sur', iso: 'kr' },
+  'CZE': { nombre: 'Chequia', iso: 'cz' },
+  'CAN': { nombre: 'Canadá', iso: 'ca' },
+  'BIH': { nombre: 'Bosnia y Herzegovina', iso: 'ba' },
+  'USA': { nombre: 'Estados Unidos', iso: 'us' },
+  'PAR': { nombre: 'Paraguay', iso: 'py' },
+  'HAI': { nombre: 'Haití', iso: 'ht' },
+  'SCO': { nombre: 'Escocia', iso: 'gb-sct' },
+  'AUS': { nombre: 'Australia', iso: 'au' },
+  'TUR': { nombre: 'Turquía', iso: 'tr' },
+  'BRA': { nombre: 'Brasil', iso: 'br' },
+  'MAR': { nombre: 'Marruecos', iso: 'ma' },
+  'QAT': { nombre: 'Catar', iso: 'qa' },
+  'SUI': { nombre: 'Suiza', iso: 'ch' },
+  'CIV': { nombre: 'Costa de Marfil', iso: 'ci' },
+  'ECU': { nombre: 'Ecuador', iso: 'ec' },
+  'GER': { nombre: 'Alemania', iso: 'de' },
+  'CUW': { nombre: 'Curazao', iso: 'cw' },
+  'NED': { nombre: 'Países Bajos', iso: 'nl' },
+  'JPN': { nombre: 'Japón', iso: 'jp' },
+  'SWE': { nombre: 'Suecia', iso: 'se' },
+  'TUN': { nombre: 'Túnez', iso: 'tn' },
+  'KSA': { nombre: 'Arabia Saudí', iso: 'sa' },
+  'URU': { nombre: 'Uruguay', iso: 'uy' },
+  'ESP': { nombre: 'España', iso: 'es' },
+  'CPV': { nombre: 'Cabo Verde', iso: 'cv' },
+  'IRN': { nombre: 'Irán', iso: 'ir' },
+  'NZL': { nombre: 'Nueva Zelanda', iso: 'nz' },
+  'BEL': { nombre: 'Bélgica', iso: 'be' },
+  'EGY': { nombre: 'Egipto', iso: 'eg' },
+  'FRA': { nombre: 'Francia', iso: 'fr' },
+  'SEN': { nombre: 'Senegal', iso: 'sn' },
+  'IRQ': { nombre: 'Irak', iso: 'iq' },
+  'NOR': { nombre: 'Noruega', iso: 'no' },
+  'ARG': { nombre: 'Argentina', iso: 'ar' },
+  'ALG': { nombre: 'Argelia', iso: 'dz' },
+  'AUT': { nombre: 'Austria', iso: 'at' },
+  'JOR': { nombre: 'Jordania', iso: 'jo' },
+  'GHA': { nombre: 'Ghana', iso: 'gh' },
+  'PAN': { nombre: 'Panamá', iso: 'pa' },
+  'ENG': { nombre: 'Inglaterra', iso: 'gb-eng' },
+  'CRO': { nombre: 'Croacia', iso: 'hr' },
+  'POR': { nombre: 'Portugal', iso: 'pt' },
+  'COD': { nombre: 'RD Congo', iso: 'cd' },
+  'UZB': { nombre: 'Uzbekistán', iso: 'uz' },
+  'COL': { nombre: 'Colombia', iso: 'co' },
 };
+
+// URL de la bandera de un equipo (ancho 40px). flagcdn sirve por codigo ISO.
+export function urlBandera(code, ancho = 40) {
+  const eq = EQUIPOS[code];
+  if (!eq) return '';
+  return `https://flagcdn.com/w${ancho}/${eq.iso}.png`;
+}
+
+// Nombre legible de un equipo.
+export function nombreEquipo(code) {
+  return EQUIPOS[code]?.nombre || code;
+}
 
 export const GRUPOS = {
   'A': ['MEX', 'RSA', 'KOR', 'CZE'],

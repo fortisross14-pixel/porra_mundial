@@ -1,11 +1,11 @@
 import { calcularTablaGrupo, claveEmpate } from '../lib/clasificacion.js';
+import { nombreEquipo } from '../../data/partidos.js';
+import Bandera from './Bandera.jsx';
 
-/* Muestra la tabla de un grupo calculada en vivo a partir de los
- * marcadores que el jugador va metiendo. Si hay empates objetivos,
- * pide al jugador que ordene esos equipos a mano.
+/* Tabla de un grupo calculada en vivo a partir de los marcadores
+ * que el jugador va metiendo. Los empates objetivos se ordenan a mano.
  */
 export default function TablaGrupo({ letra, equipos, partidos, predicciones, desempates, alOrdenar }) {
-  // Construye los partidos con los goles predichos por el jugador.
   const conGoles = partidos.map((p) => {
     const pr = predicciones[p.id] || {};
     return {
@@ -18,11 +18,14 @@ export default function TablaGrupo({ letra, equipos, partidos, predicciones, des
 
   const tabla = calcularTablaGrupo(equipos, conGoles);
 
-  // Mueve un equipo dentro de un cluster de empate (subir/bajar).
+  function ordenCluster(cluster) {
+    const clave = claveEmpate(cluster.equipos);
+    return desempates[`grupo:${letra}|${clave}`] || [...cluster.equipos];
+  }
+
   function mover(cluster, idx, dir) {
     const clave = claveEmpate(cluster.equipos);
-    const actual =
-      desempates[`grupo:${letra}|${clave}`] || [...cluster.equipos];
+    const actual = ordenCluster(cluster);
     const nuevo = [...actual];
     const destino = idx + dir;
     if (destino < 0 || destino >= nuevo.length) return;
@@ -30,12 +33,7 @@ export default function TablaGrupo({ letra, equipos, partidos, predicciones, des
     alOrdenar(`grupo:${letra}`, clave, nuevo);
   }
 
-  function ordenCluster(cluster) {
-    const clave = claveEmpate(cluster.equipos);
-    return desempates[`grupo:${letra}|${clave}`] || [...cluster.equipos];
-  }
-
-  // Para pintar, sustituye los clusters empatados por el orden manual.
+  // Aplica el orden manual sobre la tabla para pintarla.
   const filas = [...tabla.filas];
   for (const c of tabla.gruposEmpatados) {
     const orden = ordenCluster(c);
@@ -46,7 +44,7 @@ export default function TablaGrupo({ letra, equipos, partidos, predicciones, des
 
   return (
     <div className="tarjeta">
-      <h2>Grupo {letra}</h2>
+      <h3>Clasificación · Grupo {letra}</h3>
       <table className="tabla-grupo">
         <thead>
           <tr>
@@ -63,11 +61,17 @@ export default function TablaGrupo({ letra, equipos, partidos, predicciones, des
                 key={f.equipo}
                 className={(i < 2 ? 'clasifica ' : '') + (enEmpate ? 'empate' : '')}
               >
-                <td>{i + 1}. {f.equipo}</td>
+                <td>
+                  <span className="equipo-celda">
+                    <span className="pos">{i + 1}</span>
+                    <Bandera code={f.equipo} ancho={40} />
+                    {nombreEquipo(f.equipo)}
+                  </span>
+                </td>
                 <td>{f.pj}</td>
                 <td>{f.dg > 0 ? '+' + f.dg : f.dg}</td>
                 <td>{f.gf}</td>
-                <td>{f.pts}</td>
+                <td className="pts">{f.pts}</td>
               </tr>
             );
           })}
@@ -75,38 +79,20 @@ export default function TablaGrupo({ letra, equipos, partidos, predicciones, des
       </table>
 
       {tabla.gruposEmpatados.length > 0 && (
-        <div className="aviso info" style={{ marginTop: 14 }}>
+        <div className="aviso falta" style={{ marginTop: 14 }}>
           <strong>Hay empate.</strong> Los criterios automáticos (puntos,
           diferencia de goles, goles a favor) no deciden el orden. Ordénalos tú:
           {tabla.gruposEmpatados.map((c) => (
             <div key={claveEmpate(c.equipos)} style={{ marginTop: 10 }}>
               {ordenCluster(c).map((eq, idx) => (
-                <div
-                  key={eq}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '4px 0',
-                  }}
-                >
-                  <span style={{ flex: 1, fontWeight: 700 }}>
-                    {c.posicionInicio + idx + 1}. {eq}
+                <div key={eq} className="empate-fila">
+                  <span className="nombre">
+                    <strong>{c.posicionInicio + idx + 1}.</strong>
+                    <Bandera code={eq} ancho={40} />
+                    {nombreEquipo(eq)}
                   </span>
-                  <button
-                    className="btn secundario"
-                    style={{ padding: '4px 10px' }}
-                    onClick={() => mover(c, idx, -1)}
-                  >
-                    ▲
-                  </button>
-                  <button
-                    className="btn secundario"
-                    style={{ padding: '4px 10px' }}
-                    onClick={() => mover(c, idx, 1)}
-                  >
-                    ▼
-                  </button>
+                  <button className="btn-mini" onClick={() => mover(c, idx, -1)}>▲</button>
+                  <button className="btn-mini" onClick={() => mover(c, idx, 1)}>▼</button>
                 </div>
               ))}
             </div>

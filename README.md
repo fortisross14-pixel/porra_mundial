@@ -67,9 +67,25 @@ La URL `porra-mundial.vercel.app` es la porra en vivo.
 
 ## Pendiente para más adelante
 
-- Panel de administración (introducir resultados reales, abrir/cerrar
-  fases, crear la fase eliminatoria). La API ya está lista en
-  `api/admin.js`; falta la pantalla.
 - Bonus por posiciones de grupo y ranking de terceros en la
   clasificación final.
-- Fase eliminatoria completa.
+- Fase eliminatoria completa (el cuadro ya está en
+  `data/eliminatoria.js`).
+
+## Panel de administración
+
+Está en la ruta `/admin` (ej. `porra-mundial.vercel.app/admin`).
+Cualquiera puede abrir esa URL, pero solo verá un formulario de
+código: sin el código de administrador no se entra.
+
+Al introducir el código correcto, el servidor entrega una cookie de
+sesión `httpOnly` (que el navegador no expone por JavaScript). El
+código solo viaja esa vez; el resto de acciones usan la cookie.
+
+El panel permite:
+- **Jugadores**: lista por porra, con fecha de alta y cuántos
+  partidos lleva pronosticado cada uno.
+- **Fases**: abrir o cerrar cada fase. El bloqueo es MANUAL: una fase
+  abierta se puede editar; al cerrarla se bloquea y se muestra la
+  clasificación. La fecha límite es solo orientativa, no bloquea sola.
+- **Resultados**: introducir el marcador real de los 72 partidos.

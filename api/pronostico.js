@@ -8,13 +8,12 @@
 import { sql, porraPorCodigo, leerCuerpo, error } from './_lib/helpers.js';
 
 async function faseEditable(faseId) {
+  // El bloqueo es MANUAL: una fase se puede editar mientras 'abierta'
+  // sea true, sin importar la fecha límite (que es solo informativa).
   const { rows } = await sql`SELECT * FROM fases WHERE id = ${faseId}`;
   const fase = rows[0];
   if (!fase) return { ok: false, motivo: 'La fase no existe' };
   if (!fase.abierta) return { ok: false, motivo: 'La fase está cerrada' };
-  if (fase.fecha_limite && new Date(fase.fecha_limite) < new Date()) {
-    return { ok: false, motivo: 'La fecha límite ya pasó' };
-  }
   return { ok: true, fase };
 }
 

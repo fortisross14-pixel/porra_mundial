@@ -23,15 +23,14 @@ export default async function handler(req, res) {
       return error(res, 404, 'Fase no encontrada en esta porra');
     }
 
-    const bloqueada =
-      !fase.abierta ||
-      (fase.fecha_limite && new Date(fase.fecha_limite) < new Date());
+    // El ranking se muestra cuando el admin CIERRA la fase (bloqueo manual).
+    const bloqueada = !fase.abierta;
 
     if (!bloqueada) {
       return res.status(200).json({
         ok: true,
         bloqueada: false,
-        mensaje: 'La clasificación se mostrará cuando cierre la fase.',
+        mensaje: 'La clasificación se mostrará cuando el organizador cierre la fase.',
       });
     }
 

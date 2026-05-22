@@ -1,94 +1,128 @@
 /* =============================================================
- *  ESTILOS  —  La Porra Mundial
- *  Estética: editorial deportiva, oscura, tipografía condensada.
+ *  ESTILOS  —  Porra Mundial
+ *  Estética inspirada en la web oficial del Mundial 2026:
+ *  fondo gris claro, tarjetas blancas, cabecera azul marino,
+ *  tipografía sans-serif limpia.
  * ============================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --tinta: #0e0f12;
-  --tinta-2: #16181d;
-  --tarjeta: #1c1f26;
-  --borde: #2c303a;
-  --texto: #f2efe9;
-  --texto-tenue: #9a9ca6;
-  --acento: #e8472b;        /* rojo balón */
-  --acento-2: #f4c542;      /* dorado trofeo */
-  --verde: #2fae6a;
-  --display: 'Archivo Black', sans-serif;
-  --cuerpo: 'Archivo', sans-serif;
-  --mono: 'Spline Sans Mono', monospace;
+  --azul:        #1a1f71;   /* azul marino FIFA */
+  --azul-claro:  #2b3a9c;
+  --negro:       #15161a;
+  --fondo:       #f1f2f4;   /* gris claro de fondo */
+  --tarjeta:     #ffffff;
+  --borde:       #e3e5e9;
+  --texto:       #1a1c20;
+  --texto-tenue: #6b7280;
+  --acento:      #d8262f;   /* rojo */
+  --verde:       #1f9d57;
+  --dorado:      #c79a2e;
+  --titular:     'Barlow Condensed', sans-serif;
+  --cuerpo:      'Inter', sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--tinta);
-  background-image:
-    radial-gradient(circle at 12% 8%, rgba(232,71,43,0.10), transparent 42%),
-    radial-gradient(circle at 88% 92%, rgba(244,197,66,0.07), transparent 45%);
+  background: var(--fondo);
   color: var(--texto);
   font-family: var(--cuerpo);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
 
-.contenedor {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 28px 20px 80px;
+/* ---- Cabecera tipo barra ---- */
+.barra {
+  background: var(--azul);
+  color: #fff;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.barra .logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.barra .logo-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--titular);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.barra .titulos h1 {
+  font-family: var(--titular);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.barra .titulos .sub {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #aab0e8;
+  margin-top: 3px;
 }
 
-/* ---- Cabecera ---- */
-.cabecera { margin-bottom: 28px; }
-.cabecera .kicker {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--acento-2);
+.contenedor {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 22px 16px 80px;
 }
-.cabecera h1 {
-  font-family: var(--display);
-  font-size: clamp(36px, 9vw, 68px);
-  line-height: 0.92;
-  text-transform: uppercase;
-  margin-top: 6px;
-  letter-spacing: -0.01em;
-}
-.cabecera h1 em { color: var(--acento); font-style: normal; }
 
 /* ---- Tarjetas ---- */
 .tarjeta {
   background: var(--tarjeta);
   border: 1px solid var(--borde);
-  border-radius: 14px;
-  padding: 22px;
-  margin-bottom: 18px;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
 }
 .tarjeta h2 {
-  font-family: var(--display);
+  font-family: var(--titular);
+  font-size: 22px;
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 18px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   margin-bottom: 14px;
+}
+.tarjeta h3 {
+  font-family: var(--titular);
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+  margin: 4px 0 10px;
 }
 
 /* ---- Formularios ---- */
 label {
   display: block;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: var(--texto-tenue);
-  margin: 12px 0 6px;
+  margin: 14px 0 6px;
 }
 input, select {
   width: 100%;
-  background: var(--tinta-2);
+  background: #fff;
   border: 1px solid var(--borde);
-  border-radius: 9px;
+  border-radius: 8px;
   color: var(--texto);
   font-family: var(--cuerpo);
   font-size: 15px;
@@ -96,95 +130,202 @@ input, select {
 }
 input:focus, select:focus {
   outline: none;
-  border-color: var(--acento);
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(26, 31, 113, 0.12);
 }
 
 /* ---- Botones ---- */
 .btn {
-  font-family: var(--display);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-family: var(--cuerpo);
+  font-weight: 700;
   font-size: 14px;
   border: none;
-  border-radius: 9px;
-  padding: 12px 20px;
+  border-radius: 8px;
+  padding: 12px 18px;
   cursor: pointer;
-  background: var(--acento);
+  background: var(--azul);
   color: #fff;
-  transition: transform 0.08s ease, filter 0.15s ease;
+  transition: background 0.15s ease, transform 0.06s ease;
 }
-.btn:hover { filter: brightness(1.1); }
+.btn:hover { background: var(--azul-claro); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn.secundario { background: var(--tinta-2); border: 1px solid var(--borde); color: var(--texto); }
-.btn.fila { width: 100%; margin-top: 16px; }
+.btn.secundario {
+  background: #fff;
+  border: 1px solid var(--borde);
+  color: var(--texto);
+}
+.btn.secundario:hover { background: #f5f6f8; }
+.btn.fila { width: 100%; margin-top: 18px; }
+
+/* ---- Pestañas (grupos / vistas) ---- */
+.pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.pestana {
+  font-family: var(--titular);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 7px;
+  border: 1px solid var(--borde);
+  background: #fff;
+  color: var(--texto-tenue);
+  cursor: pointer;
+}
+.pestana:hover { border-color: var(--azul); }
+.pestana.activa {
+  background: var(--azul);
+  border-color: var(--azul);
+  color: #fff;
+}
 
 /* ---- Avisos ---- */
 .aviso {
   font-size: 14px;
-  padding: 10px 13px;
+  padding: 11px 13px;
   border-radius: 8px;
   margin-top: 12px;
 }
-.aviso.error { background: rgba(232,71,43,0.13); border: 1px solid var(--acento); }
-.aviso.ok    { background: rgba(47,174,106,0.13); border: 1px solid var(--verde); }
-.aviso.info  { background: var(--tinta-2); border: 1px solid var(--borde); color: var(--texto-tenue); }
+.aviso.error { background: #fdecec; border: 1px solid var(--acento); color: #9a1b22; }
+.aviso.ok    { background: #e8f6ee; border: 1px solid var(--verde); color: #156c3d; }
+.aviso.info  { background: #f3f4f6; border: 1px solid var(--borde); color: var(--texto-tenue); }
+.aviso.falta { background: #fff7e6; border: 1px solid var(--dorado); color: #8a6314; }
+
+/* ---- Bandera ---- */
+.bandera {
+  width: 26px;
+  height: 18px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--borde);
+  flex-shrink: 0;
+  vertical-align: middle;
+}
 
 /* ---- Partido (fila de predicción) ---- */
 .partido {
   display: grid;
-  grid-template-columns: 1fr 46px 14px 46px 1fr;
+  grid-template-columns: 1fr 44px 12px 44px 1fr;
   align-items: center;
   gap: 8px;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--borde);
 }
 .partido:last-child { border-bottom: none; }
-.partido .equipo { font-weight: 700; font-size: 14px; }
-.partido .equipo.visita { text-align: right; }
-.partido .marcador {
+.partido .lado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+.partido .lado.visita { justify-content: flex-end; text-align: right; }
+.partido .lado .nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.partido input.marcador {
   text-align: center;
-  font-family: var(--mono);
   font-weight: 700;
+  font-size: 16px;
   padding: 8px 0;
 }
 .partido .guion { text-align: center; color: var(--texto-tenue); }
+.partido .fecha-partido {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: var(--texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: -4px;
+}
 
 /* ---- Tabla de grupo ---- */
-.tabla-grupo { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+.tabla-grupo { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
 .tabla-grupo th {
-  font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--texto-tenue);
   text-align: right;
-  padding: 6px 8px;
+  padding: 7px 8px;
+  border-bottom: 2px solid var(--borde);
 }
 .tabla-grupo th:first-child { text-align: left; }
-.tabla-grupo td { padding: 7px 8px; text-align: right; border-top: 1px solid var(--borde); }
-.tabla-grupo td:first-child { text-align: left; font-weight: 700; }
-.tabla-grupo tr.clasifica td { color: var(--acento-2); }
-.tabla-grupo tr.empate td { background: rgba(244,197,66,0.06); }
+.tabla-grupo td { padding: 9px 8px; text-align: right; border-bottom: 1px solid var(--borde); }
+.tabla-grupo td:first-child { text-align: left; }
+.tabla-grupo .equipo-celda { display: flex; align-items: center; gap: 8px; }
+.tabla-grupo .equipo-celda .pos { color: var(--texto-tenue); font-weight: 700; width: 16px; }
+.tabla-grupo tr.clasifica { background: #eef0fb; }
+.tabla-grupo tr.clasifica td:first-child { box-shadow: inset 3px 0 0 var(--azul); }
+.tabla-grupo tr.empate { background: #fff7e6; }
+.tabla-grupo td.pts { font-weight: 700; }
+
+/* ---- Ordenar empates ---- */
+.empate-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+.empate-fila .nombre { flex: 1; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.btn-mini {
+  border: 1px solid var(--borde);
+  background: #fff;
+  border-radius: 6px;
+  padding: 4px 9px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.btn-mini:hover { background: #f5f6f8; }
 
 /* ---- Clasificación general ---- */
 .ranking { width: 100%; border-collapse: collapse; }
-.ranking td { padding: 12px 10px; border-top: 1px solid var(--borde); }
+.ranking td { padding: 13px 10px; border-bottom: 1px solid var(--borde); }
 .ranking td:last-child {
   text-align: right;
-  font-family: var(--mono);
+  font-family: var(--titular);
   font-weight: 700;
-  font-size: 18px;
-  color: var(--acento-2);
+  font-size: 20px;
+  color: var(--azul);
 }
-.ranking .pos { font-family: var(--display); color: var(--texto-tenue); width: 40px; }
-.ranking tr:first-child .pos { color: var(--acento-2); }
+.ranking .pos {
+  font-family: var(--titular);
+  font-weight: 700;
+  color: var(--texto-tenue);
+  width: 36px;
+}
+.ranking tr:first-child .pos { color: var(--dorado); }
+
+.fila-cuenta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
 .pie {
-  margin-top: 30px;
-  font-family: var(--mono);
+  margin-top: 28px;
   font-size: 11px;
   color: var(--texto-tenue);
   text-align: center;
   letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 520px) {
+  .barra .titulos h1 { font-size: 21px; }
+  .partido { grid-template-columns: 1fr 38px 10px 38px 1fr; gap: 5px; }
+  .partido .lado { font-size: 13px; }
+  .tarjeta { padding: 16px; }
 }

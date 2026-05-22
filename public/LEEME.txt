@@ -1,0 +1,2 @@
+Pon aquí tu logo con el nombre exacto: logo.png
+Si no hay logo.png, la app muestra un recuadro con "PM".
