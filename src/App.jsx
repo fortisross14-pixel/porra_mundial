@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Acceso from './components/Acceso.jsx';
 import Pronostico from './components/Pronostico.jsx';
+import PronosticoElim from './components/PronosticoElim.jsx';
 import CuadroHonor from './components/CuadroHonor.jsx';
 import Resultados from './components/Resultados.jsx';
 import Admin from './components/Admin.jsx';
@@ -96,7 +97,11 @@ export default function App() {
               )}
             </div>
 
-            {fase && vista === 'pronostico' && <Pronostico sesion={sesion} fase={fase} />}
+            {fase && vista === 'pronostico' && (
+              /eliminatoria/i.test(fase.nombre || '')
+                ? <PronosticoElim sesion={sesion} fase={fase} />
+                : <Pronostico sesion={sesion} fase={fase} />
+            )}
             {fase && vista === 'cuadro' && <CuadroHonor sesion={sesion} fase={fase} />}
             {fase && vista === 'resultados' && <Resultados sesion={sesion} fase={fase} />}
           </>

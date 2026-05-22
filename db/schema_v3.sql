@@ -36,3 +36,11 @@ CREATE TABLE cuadro_eliminatorio (
 -- FROM fases f JOIN porras p ON p.id = f.porra_id
 -- ORDER BY p.id, f.id;
 --  -> cada porra debe tener 2 fases: Fase de Grupos y Fase Eliminatoria.
+
+
+-- ===== PASO V3-3 =====
+-- La predicción de eliminatoria necesita guardar, además del marcador,
+-- qué equipo pasa en penaltis cuando el jugador predice empate.
+-- Se añade una columna a 'predicciones' (vacía para los partidos de
+-- grupos, que nunca tienen penaltis).
+ALTER TABLE predicciones ADD COLUMN IF NOT EXISTS penaltis TEXT DEFAULT '';

@@ -536,3 +536,25 @@ input:focus, select:focus {
   text-transform: uppercase;
 }
 .cruce select { width: auto; padding: 8px 10px; }
+
+/* ---- Selector de penaltis (cruce empatado) ---- */
+.penaltis {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--borde);
+}
+.penaltis-txt {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dorado);
+}
+.btn-mini.pen-activo {
+  background: var(--azul);
+  color: #fff;
+  border-color: var(--azul);
+}

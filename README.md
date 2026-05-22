@@ -151,3 +151,20 @@ Flujo:
 
 La pantalla donde los jugadores rellenan su cuadro se construye en
 la Parte 2 (junto con las columnas de Fase final del ranking).
+
+## Fase eliminatoria — Parte 2 (pronóstico del jugador)
+
+Ejecuta el PASO V3-3 de `db/schema_v3.sql` (añade la columna de
+penaltis). Después:
+
+- Cuando abras la Fase Eliminatoria, los jugadores ven la pestaña
+  "Mi pronóstico" con el cuadro: predicen el marcador de cada cruce.
+- El ganador que predicen avanza y rellena la ronda siguiente.
+- Si predicen empate, eligen quién pasa en penaltis.
+- Una sola pantalla, un solo guardado, todo el cuadro.
+
+### Pendiente (último tramo)
+- Mostrar los puntos de la fase eliminatoria en las columnas
+  "Fase final" del ranking (ahora siguen a 0).
+- Cálculo del bonus por posición de grupo (columna "Posic.").
+- Pantalla de admin para validar el cuadro de honor al final.
