@@ -3,6 +3,8 @@ import { api } from '../lib/api.js';
 import { GRUPOS, partidosDeGrupo, nombreEquipo } from '../../data/partidos.js';
 import { valoresDesdeFilas } from '../../puntuacion.js';
 import { rankingTotal, cuadriculaDia, diasConPartidos } from '../lib/calculo.js';
+import { RONDAS_ELIM } from '../lib/eliminatoria.js';
+import { NOMBRE_RONDA } from '../../data/eliminatoria.js';
 import Bandera from './Bandera.jsx';
 import Modal from './Modal.jsx';
 import TablaPuntos from './TablaPuntos.jsx';
@@ -13,7 +15,7 @@ import DesgloseJugador from './DesglosesJugador.jsx';
  *   - Resultados diarios : ranking de jugadores por día
  *   - Clasificación total: ranking acumulado
  */
-export default function Resultados({ sesion, fase }) {
+export default function Resultados({ sesion, faseGrupos, faseElim }) {
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
   const [sub, setSub] = useState('resultados');
@@ -22,12 +24,13 @@ export default function Resultados({ sesion, fase }) {
   useEffect(() => {
     (async () => {
       try {
-        setDatos(await api.ranking(sesion.codigo, fase.id));
+        // El ranking se calcula sobre la fase de grupos.
+        setDatos(await api.ranking(sesion.codigo, faseGrupos.id));
       } catch (e) {
         setError(e.message);
       }
     })();
-  }, [sesion, fase]);
+  }, [sesion, faseGrupos]);
 
   if (error) return <div className="tarjeta"><div className="aviso error">{error}</div></div>;
   if (!datos) return <div className="tarjeta">Cargando…</div>;
@@ -54,7 +57,7 @@ export default function Resultados({ sesion, fase }) {
           onClick={() => setSub('total')}>Clasificación total</button>
       </div>
 
-      {sub === 'resultados' && <ResultadosPorGrupo datos={datos} />}
+      {sub === 'resultados' && <ResultadosPorSeccion datos={datos} faseElim={faseElim} />}
       {sub === 'diarios' && <ResultadosDiarios datos={datos} valores={valores} />}
       {sub === 'total' && <ClasificacionTotal datos={datos} valores={valores} />}
 
@@ -67,49 +70,82 @@ export default function Resultados({ sesion, fase }) {
   );
 }
 
-/* ---------- Resultados reales del Mundial, por grupo ---------- */
-function ResultadosPorGrupo({ datos }) {
+/* ---------- Resultados reales: secciones (grupos / cuadro / rondas) ---------- */
+function ResultadosPorSeccion({ datos, faseElim }) {
   const letras = Object.keys(GRUPOS);
-  const [grupo, setGrupo] = useState(letras[0]);
+  const [seccion, setSeccion] = useState('G:' + letras[0]);
 
   const real = {};
   for (const r of datos.resultados) {
     real[r.partido_id] = { l: r.goles_local, v: r.goles_visitante };
   }
-  const partidos = partidosDeGrupo(grupo);
 
   return (
     <>
       <div className="pestanas">
         {letras.map((l) => (
-          <button key={l} className={'pestana ' + (l === grupo ? 'activa' : '')}
-            onClick={() => setGrupo(l)}>Grupo {l}</button>
+          <button key={l}
+            className={'pestana ' + (seccion === 'G:' + l ? 'activa' : '')}
+            onClick={() => setSeccion('G:' + l)}>Grupo {l}</button>
+        ))}
+        <button
+          className={'pestana ' + (seccion === 'cuadro' ? 'activa' : '')}
+          onClick={() => setSeccion('cuadro')}>Cuadro de honor</button>
+        {RONDAS_ELIM.map((r) => (
+          <button key={r}
+            className={'pestana ' + (seccion === 'R:' + r ? 'activa' : '')}
+            onClick={() => setSeccion('R:' + r)}>{NOMBRE_RONDA[r]}</button>
         ))}
       </div>
-      <div className="tarjeta">
-        <h3>Resultados reales · Grupo {grupo}</h3>
-        {partidos.map((p) => {
-          const r = real[p.id];
-          return (
-            <div className="partido" key={p.id}>
-              <span className="lado">
-                <Bandera code={p.local} ancho={40} />
-                <span className="nombre">{nombreEquipo(p.local)}</span>
-              </span>
-              <span className="marcador">{r ? r.l : '–'}</span>
-              <span className="guion">–</span>
-              <span className="marcador">{r ? r.v : '–'}</span>
-              <span className="lado visita">
-                <span className="nombre">{nombreEquipo(p.visitante)}</span>
-                <Bandera code={p.visitante} ancho={40} />
-              </span>
-            </div>
-          );
-        })}
-        <p className="aviso info" style={{ marginTop: 12 }}>
-          Un guion (–) significa que el partido aún no tiene resultado.
-        </p>
-      </div>
+
+      {seccion.startsWith('G:') && (
+        <div className="tarjeta">
+          <h3>Resultados reales · Grupo {seccion.slice(2)}</h3>
+          {partidosDeGrupo(seccion.slice(2)).map((p) => {
+            const r = real[p.id];
+            return (
+              <div className="partido" key={p.id}>
+                <span className="lado">
+                  <Bandera code={p.local} ancho={40} />
+                  <span className="nombre">{nombreEquipo(p.local)}</span>
+                </span>
+                <span className="marcador">{r ? r.l : '–'}</span>
+                <span className="guion">–</span>
+                <span className="marcador">{r ? r.v : '–'}</span>
+                <span className="lado visita">
+                  <span className="nombre">{nombreEquipo(p.visitante)}</span>
+                  <Bandera code={p.visitante} ancho={40} />
+                </span>
+              </div>
+            );
+          })}
+          <p className="aviso info" style={{ marginTop: 12 }}>
+            Un guion (–) significa que el partido aún no tiene resultado.
+          </p>
+        </div>
+      )}
+
+      {seccion === 'cuadro' && (
+        <div className="tarjeta">
+          <h3>Cuadro de honor</h3>
+          <p className="aviso info">
+            Los aciertos del cuadro de honor (campeón, subcampeón, etc.)
+            se conocen al terminar el Mundial. El organizador los validará
+            entonces y los puntos aparecerán en la clasificación total.
+          </p>
+        </div>
+      )}
+
+      {seccion.startsWith('R:') && (
+        <div className="tarjeta">
+          <h3>{NOMBRE_RONDA[seccion.slice(2)]}</h3>
+          <p className="aviso info">
+            {faseElim && faseElim.abierta
+              ? 'Los resultados de la fase eliminatoria se mostrarán según se vayan jugando los partidos.'
+              : 'La fase eliminatoria aún no está disponible.'}
+          </p>
+        </div>
+      )}
     </>
   );
 }

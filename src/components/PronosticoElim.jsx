@@ -10,7 +10,7 @@ import Bandera from './Bandera.jsx';
  * avanza y rellena la ronda siguiente (cuadro progresivo).
  * Si predice empate, elige quién pasa en penaltis.
  */
-export default function PronosticoElim({ sesion, fase }) {
+export default function PronosticoElim({ sesion, fase, rondaExterna }) {
   const [base, setBase] = useState(null);          // cuadro resuelto por el admin
   const [predicciones, setPredicciones] = useState({}); // cruceId -> {local,visitante,penaltis}
   const [estado, setEstado] = useState(null);
@@ -115,21 +115,23 @@ export default function PronosticoElim({ sesion, fase }) {
 
   return (
     <>
-      <div className="tarjeta">
-        <h2>{fase.nombre}</h2>
-        {bloqueada ? (
-          <p className="aviso info">
-            Esta fase está cerrada. Tu cuadro ya no se puede modificar.
-          </p>
-        ) : (
-          <p className="aviso info">
-            Predice el marcador de cada cruce. El ganador que elijas avanza
-            a la siguiente ronda. Si empatas, elige quién pasa en penaltis.
-          </p>
-        )}
-      </div>
+      {!rondaExterna && (
+        <div className="tarjeta">
+          <h2>{fase.nombre}</h2>
+          {bloqueada ? (
+            <p className="aviso info">
+              Esta fase está cerrada. Tu cuadro ya no se puede modificar.
+            </p>
+          ) : (
+            <p className="aviso info">
+              Predice el marcador de cada cruce. El ganador que elijas avanza
+              a la siguiente ronda. Si empatas, elige quién pasa en penaltis.
+            </p>
+          )}
+        </div>
+      )}
 
-      {RONDAS_ELIM.map((ronda) => (
+      {RONDAS_ELIM.filter((r) => !rondaExterna || r === rondaExterna).map((ronda) => (
         porRonda[ronda] ? (
           <div className="tarjeta" key={ronda}>
             <h3>{NOMBRE_RONDA[ronda]}</h3>

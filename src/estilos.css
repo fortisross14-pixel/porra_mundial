@@ -558,3 +558,15 @@ input:focus, select:focus {
   color: #fff;
   border-color: var(--azul);
 }
+
+/* ---- Pestaña sombreada (sección no disponible aún) ---- */
+.pestana.sombreada {
+  opacity: 0.45;
+  background: #f1f2f4;
+  color: var(--texto-tenue);
+}
+.pestana.sombreada.activa {
+  opacity: 1;
+  background: var(--azul);
+  color: #fff;
+}

@@ -96,7 +96,6 @@ function PanelAdmin({ alSalir }) {
     ['resultados', 'Resultados'],
     ['cuadro', 'Cuadro'],
     ['puntos', 'Puntos'],
-    ['porras', 'Porras'],
   ];
 
   return (
@@ -118,21 +117,48 @@ function PanelAdmin({ alSalir }) {
         ))}
       </div>
 
-      {pestana === 'jugadores' && <PanelJugadores datos={datos} />}
+      {pestana === 'jugadores' && <PanelJugadores datos={datos} recargar={recargar} />}
       {pestana === 'fases' && <PanelFases datos={datos} recargar={recargar} />}
       {pestana === 'resultados' && <PanelResultados datos={datos} recargar={recargar} />}
       {pestana === 'cuadro' && <PanelCuadro datos={datos} />}
       {pestana === 'puntos' && <PanelPuntos datos={datos} recargar={recargar} />}
-      {pestana === 'porras' && <PanelPorras datos={datos} recargar={recargar} />}
     </>
   );
 }
 
 /* ---------- Jugadores: lista por porra (muestra el CÓDIGO) ---------- */
-function PanelJugadores({ datos }) {
+function PanelJugadores({ datos, recargar }) {
   const total = PARTIDOS.length;
+  const [confirmar, setConfirmar] = useState(null); // jugadorId pendiente
+  const [estado, setEstado] = useState('');
+
+  async function borrar(jugadorId) {
+    setEstado('');
+    try {
+      await api.adminBorrarJugador(jugadorId);
+      setConfirmar(null);
+      setEstado('Jugador eliminado.');
+      await recargar();
+    } catch (e) {
+      setEstado('Error: ' + e.message);
+    }
+  }
+
   return (
     <>
+      <div className="tarjeta">
+        <p className="aviso info">
+          Puedes eliminar la inscripción de un jugador concreto (por
+          ejemplo, un registro duplicado o abandonado). Se borra solo
+          ese jugador y su pronóstico; la porra y los demás no se tocan.
+        </p>
+        {estado && (
+          <div className={'aviso ' + (estado.startsWith('Error') ? 'error' : 'ok')}>
+            {estado}
+          </div>
+        )}
+      </div>
+
       {datos.porras.map((porra) => {
         const jugadores = datos.jugadores.filter((j) => j.porra_id === porra.id);
         const fase = datos.fases.find((f) => f.porra_id === porra.id);
@@ -145,7 +171,10 @@ function PanelJugadores({ datos }) {
             {jugadores.length > 0 && (
               <table className="tabla-grupo">
                 <thead>
-                  <tr><th>Jugador</th><th>Alta</th><th>Avance</th><th>Estado</th></tr>
+                  <tr>
+                    <th>Jugador</th><th>Alta</th><th>Avance</th>
+                    <th>Estado</th><th></th>
+                  </tr>
                 </thead>
                 <tbody>
                   {jugadores.map((j) => {
@@ -162,6 +191,15 @@ function PanelJugadores({ datos }) {
                         <td style={{ color: completo ? 'var(--verde)' : 'var(--dorado)', fontWeight: 700 }}>
                           {completo ? 'Completo' : 'Incompleto'}
                         </td>
+                        <td>
+                          <button
+                            className="btn-mini"
+                            style={{ borderColor: 'var(--acento)', color: 'var(--acento)' }}
+                            onClick={() => setConfirmar(j)}
+                          >
+                            Borrar
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -171,6 +209,27 @@ function PanelJugadores({ datos }) {
           </div>
         );
       })}
+
+      {confirmar && (
+        <div className="tarjeta">
+          <div className="zona-peligro">
+            <strong>¿Borrar la inscripción de {confirmar.usuario}?</strong>
+            <p style={{ fontSize: 13, margin: '6px 0 10px' }}>
+              Se eliminará este jugador y todo su pronóstico (marcadores,
+              desempates y cuadro de honor). No se puede deshacer.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn" style={{ background: 'var(--acento)' }}
+                onClick={() => borrar(confirmar.id)}>
+                Sí, borrar
+              </button>
+              <button className="btn secundario" onClick={() => setConfirmar(null)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -353,92 +412,6 @@ function PanelPuntos({ datos, recargar }) {
         alCambiarCuadro={(v) => setCuadro(Math.max(0, parseInt(v, 10) || 0))}
       />
       <button className="btn fila" onClick={guardar}>Guardar valores</button>
-      {estado && (
-        <div className={'aviso ' + (estado.startsWith('Error') ? 'error' : 'ok')}>
-          {estado}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ---------- Porras: borrar una porra duplicada ---------- */
-function PanelPorras({ datos, recargar }) {
-  const [confirmar, setConfirmar] = useState(null); // porraId pendiente de confirmar
-  const [estado, setEstado] = useState('');
-
-  async function borrar(porraId) {
-    setEstado('');
-    try {
-      await api.adminBorrarPorra(porraId);
-      setConfirmar(null);
-      setEstado('Porra eliminada.');
-      await recargar();
-    } catch (e) {
-      setEstado('Error: ' + e.message);
-    }
-  }
-
-  return (
-    <div className="tarjeta">
-      <h3>Porras</h3>
-      <p className="aviso info">
-        Borra una porra solo si es un duplicado. Se elimina la porra y
-        TODOS sus jugadores y pronósticos. No se puede deshacer.
-      </p>
-      <table className="tabla-grupo">
-        <thead>
-          <tr><th>Código</th><th>Nombre</th><th>Jugadores</th><th>Acción</th></tr>
-        </thead>
-        <tbody>
-          {datos.porras.map((p) => {
-            const n = datos.jugadores.filter((j) => j.porra_id === p.id).length;
-            return (
-              <tr key={p.id}>
-                <td style={{ fontWeight: 700 }}>{p.codigo}</td>
-                <td>{p.nombre}</td>
-                <td>{n}</td>
-                <td>
-                  <button
-                    className="btn-mini"
-                    style={{ borderColor: 'var(--acento)', color: 'var(--acento)' }}
-                    onClick={() => setConfirmar(p.id)}
-                  >
-                    Borrar
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      {confirmar != null && (
-        <div className="zona-peligro">
-          {(() => {
-            const p = datos.porras.find((x) => x.id === confirmar);
-            const n = datos.jugadores.filter((j) => j.porra_id === confirmar).length;
-            return (
-              <>
-                <strong>¿Borrar la porra {p?.codigo}?</strong>
-                <p style={{ fontSize: 13, margin: '6px 0 10px' }}>
-                  Se eliminarán {n} jugador(es) y todos sus pronósticos.
-                  Esta acción no se puede deshacer.
-                </p>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button className="btn" style={{ background: 'var(--acento)' }}
-                    onClick={() => borrar(confirmar)}>
-                    Sí, borrar definitivamente
-                  </button>
-                  <button className="btn secundario" onClick={() => setConfirmar(null)}>
-                    Cancelar
-                  </button>
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      )}
       {estado && (
         <div className={'aviso ' + (estado.startsWith('Error') ? 'error' : 'ok')}>
           {estado}

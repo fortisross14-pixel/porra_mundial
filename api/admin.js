@@ -75,22 +75,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    if (accion === 'borrarPorra') {
-      // Borra una porra y TODO lo que cuelga de ella. Irreversible.
-      // Se usa solo para eliminar una porra duplicada.
-      const { porraId } = cuerpo;
-      const { rows: jug } = await sql`
-        SELECT id FROM jugadores WHERE porra_id = ${porraId}
-      `;
-      const ids = jug.map((j) => j.id);
-      if (ids.length) {
-        await sql`DELETE FROM predicciones WHERE jugador_id = ANY(${ids})`;
-        await sql`DELETE FROM desempates WHERE jugador_id = ANY(${ids})`;
-        await sql`DELETE FROM cuadro_honor WHERE jugador_id = ANY(${ids})`;
-      }
-      await sql`DELETE FROM jugadores WHERE porra_id = ${porraId}`;
-      await sql`DELETE FROM fases WHERE porra_id = ${porraId}`;
-      await sql`DELETE FROM porras WHERE id = ${porraId}`;
+    if (accion === 'borrarJugador') {
+      // Borra UN jugador concreto y todo lo suyo (predicciones,
+      // desempates, cuadro de honor). La porra y el resto de
+      // jugadores no se tocan. Se usa para eliminar una inscripción
+      // duplicada o abandonada.
+      const { jugadorId } = cuerpo;
+      await sql`DELETE FROM predicciones WHERE jugador_id = ${jugadorId}`;
+      await sql`DELETE FROM desempates WHERE jugador_id = ${jugadorId}`;
+      await sql`DELETE FROM cuadro_honor WHERE jugador_id = ${jugadorId}`;
+      await sql`DELETE FROM jugadores WHERE id = ${jugadorId}`;
       return res.status(200).json({ ok: true });
     }
 

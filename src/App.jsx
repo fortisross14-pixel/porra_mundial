@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import Acceso from './components/Acceso.jsx';
-import Pronostico from './components/Pronostico.jsx';
-import PronosticoElim from './components/PronosticoElim.jsx';
-import CuadroHonor from './components/CuadroHonor.jsx';
+import MiPronostico from './components/MiPronostico.jsx';
 import Resultados from './components/Resultados.jsx';
 import Admin from './components/Admin.jsx';
 
@@ -28,12 +26,9 @@ function Barra() {
 export default function App() {
   const [sesion, setSesion] = useState(null); // { codigo, porra, fases, jugador }
   const [vista, setVista] = useState('pronostico');
-  const [faseId, setFaseId] = useState(null);
 
   const esAdmin = typeof window !== 'undefined' &&
     window.location.pathname.replace(/\/$/, '') === '/admin';
-
-  const fase = sesion?.fases.find((f) => f.id === faseId) || sesion?.fases[0];
 
   if (esAdmin) {
     return (
@@ -47,9 +42,12 @@ export default function App() {
     );
   }
 
+  // Localiza las dos fases por su nombre.
+  const faseGrupos = sesion?.fases.find((f) => /grupos/i.test(f.nombre));
+  const faseElim = sesion?.fases.find((f) => /eliminatoria/i.test(f.nombre));
+
   const tabs = [
     ['pronostico', 'Mi pronóstico'],
-    ['cuadro', 'Cuadro de honor'],
     ['resultados', 'Resultados'],
   ];
 
@@ -58,12 +56,7 @@ export default function App() {
       <Barra />
       <div className="contenedor">
         {!sesion && (
-          <Acceso
-            alEntrar={(s) => {
-              setSesion(s);
-              setFaseId(s.fases[0]?.id ?? null);
-            }}
-          />
+          <Acceso alEntrar={(s) => setSesion(s)} />
         )}
 
         {sesion && (
@@ -83,27 +76,22 @@ export default function App() {
                   >{txt}</button>
                 ))}
               </div>
-
-              {sesion.fases.length > 1 && (
-                <>
-                  <label>Fase</label>
-                  <select value={fase?.id}
-                    onChange={(e) => setFaseId(Number(e.target.value))}>
-                    {sesion.fases.map((f) => (
-                      <option key={f.id} value={f.id}>{f.nombre}</option>
-                    ))}
-                  </select>
-                </>
-              )}
             </div>
 
-            {fase && vista === 'pronostico' && (
-              /eliminatoria/i.test(fase.nombre || '')
-                ? <PronosticoElim sesion={sesion} fase={fase} />
-                : <Pronostico sesion={sesion} fase={fase} />
+            {vista === 'pronostico' && (
+              <MiPronostico
+                sesion={sesion}
+                faseGrupos={faseGrupos}
+                faseElim={faseElim}
+              />
             )}
-            {fase && vista === 'cuadro' && <CuadroHonor sesion={sesion} fase={fase} />}
-            {fase && vista === 'resultados' && <Resultados sesion={sesion} fase={fase} />}
+            {vista === 'resultados' && (
+              <Resultados
+                sesion={sesion}
+                faseGrupos={faseGrupos}
+                faseElim={faseElim}
+              />
+            )}
           </>
         )}
 

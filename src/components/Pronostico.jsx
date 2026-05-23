@@ -8,14 +8,17 @@ import Bandera from './Bandera.jsx';
  *  - Pestañas de grupo (A-L) arriba; se ve un grupo cada vez.
  *  - Al guardar, si faltan partidos, avisa "Faltan partidos por pronosticar".
  */
-export default function Pronostico({ sesion, fase }) {
+export default function Pronostico({ sesion, fase, grupoExterno }) {
   const [predicciones, setPredicciones] = useState({}); // partidoId -> {golesLocal, golesVisitante}
   const [desempates, setDesempates] = useState({});      // "grupo:X|clave" -> [equipos...]
   const [estado, setEstado] = useState(null);            // { tipo, texto }
   const [cargando, setCargando] = useState(true);
 
   const letras = Object.keys(GRUPOS);
-  const [grupoActivo, setGrupoActivo] = useState(letras[0] || null);
+  const [grupoInterno, setGrupoInterno] = useState(letras[0] || null);
+  // Si llega grupoExterno, lo manda el componente padre (MiPronostico).
+  const grupoActivo = grupoExterno || grupoInterno;
+  const controladoFuera = Boolean(grupoExterno);
   const sinDatos = letras.length === 0;
 
   useEffect(() => {
@@ -120,33 +123,37 @@ export default function Pronostico({ sesion, fase }) {
 
   return (
     <>
-      <div className="tarjeta">
-        <h2>{fase.nombre}</h2>
-        {bloqueada ? (
-          <p className="aviso info">
-            Esta fase está cerrada. Tu pronóstico ya no se puede modificar.
-          </p>
-        ) : (
-          <p className="aviso info">
-            Elige un grupo, mete los marcadores y guarda. La clasificación se
-            actualiza sola.
-            {limite && ` Fecha orientativa: ${limite.toLocaleDateString('es-ES')}.`}
-          </p>
-        )}
-      </div>
+      {!controladoFuera && (
+        <div className="tarjeta">
+          <h2>{fase.nombre}</h2>
+          {bloqueada ? (
+            <p className="aviso info">
+              Esta fase está cerrada. Tu pronóstico ya no se puede modificar.
+            </p>
+          ) : (
+            <p className="aviso info">
+              Elige un grupo, mete los marcadores y guarda. La clasificación se
+              actualiza sola.
+              {limite && ` Fecha orientativa: ${limite.toLocaleDateString('es-ES')}.`}
+            </p>
+          )}
+        </div>
+      )}
 
-      {/* Pestañas de grupo */}
-      <div className="pestanas">
-        {letras.map((l) => (
-          <button
-            key={l}
-            className={'pestana ' + (l === grupoActivo ? 'activa' : '')}
-            onClick={() => setGrupoActivo(l)}
-          >
-            Grupo {l}
-          </button>
-        ))}
-      </div>
+      {/* Pestañas de grupo: solo si NO lo controla MiPronostico */}
+      {!controladoFuera && (
+        <div className="pestanas">
+          {letras.map((l) => (
+            <button
+              key={l}
+              className={'pestana ' + (l === grupoActivo ? 'activa' : '')}
+              onClick={() => setGrupoInterno(l)}
+            >
+              Grupo {l}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Partidos del grupo activo */}
       <div className="tarjeta">

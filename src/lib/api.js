@@ -77,10 +77,10 @@ export const api = {
       body: JSON.stringify({ accion: 'guardarPuntos', valores, cuadroHonor }),
     }),
 
-  adminBorrarPorra: (porraId) =>
+  adminBorrarJugador: (jugadorId) =>
     pedir('/api/admin', {
       method: 'POST',
-      body: JSON.stringify({ accion: 'borrarPorra', porraId }),
+      body: JSON.stringify({ accion: 'borrarJugador', jugadorId }),
     }),
 
   puntos: () => pedir('/api/puntos'),
