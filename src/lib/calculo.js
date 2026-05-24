@@ -12,6 +12,7 @@
 
 import { puntosPartido, resultado1X2 } from '../../puntuacion.js';
 import { PARTIDOS, EQUIPOS } from '../../data/partidos.js';
+import { bonusPosicionGrupos, puntosEliminatoria } from './puntuacion_completa.js';
 
 // Índice rápido: partido_id -> objeto partido.
 const PORID = {};
@@ -101,14 +102,17 @@ export function rankingDia(dia, jugadores, predicciones, resultados, valores) {
   return rankingSobre(resDia, jugadores, predicciones, valores);
 }
 
-/* Ranking total: todos los partidos con resultado. */
-export function rankingTotal(jugadores, predicciones, resultados, valores) {
-  return rankingSobre(resultados, jugadores, predicciones, valores);
+/* Ranking total: todos los partidos con resultado.
+ * `extra` (opcional) = { desempates, prediccionesElim, cuadroElim }
+ * para sumar el bonus de posición de grupo y los puntos de eliminatoria.
+ */
+export function rankingTotal(jugadores, predicciones, resultados, valores, extra) {
+  return rankingSobre(resultados, jugadores, predicciones, valores, extra);
 }
 
 // Núcleo común: dado un conjunto de resultados, suma puntos por jugador.
 // Separa el conteo en grupos (1x2 / exacto) para la tabla de columnas.
-function rankingSobre(resultados, jugadores, predicciones, valores) {
+function rankingSobre(resultados, jugadores, predicciones, valores, extra) {
   const real = {};
   for (const r of resultados) {
     real[r.partido_id] = { local: r.goles_local, visitante: r.goles_visitante };
@@ -135,7 +139,65 @@ function rankingSobre(resultados, jugadores, predicciones, valores) {
     else if (res.tipo === '1x2') a.grupos1x2 += 1;
     a.puntos += res.puntos;
   }
+
+  // Bonus de posición de grupo + puntos de eliminatoria.
+  if (extra) {
+    const valorClasif = valores.grupos?.clasificado || 0;
+
+    // Predicciones de grupos indexadas por jugador -> partido.
+    const predGruposPorJug = {};
+    for (const p of predicciones) {
+      if (!predGruposPorJug[p.jugador_id]) predGruposPorJug[p.jugador_id] = {};
+      predGruposPorJug[p.jugador_id][p.partido_id] = {
+        local: p.goles_local, visitante: p.goles_visitante,
+      };
+    }
+    // Predicciones de eliminatoria indexadas por jugador -> cruce.
+    const predElimPorJug = {};
+    for (const p of extra.prediccionesElim || []) {
+      if (!predElimPorJug[p.jugador_id]) predElimPorJug[p.jugador_id] = {};
+      predElimPorJug[p.jugador_id][p.partido_id] = {
+        local: p.goles_local, visitante: p.goles_visitante,
+        penaltis: p.penaltis || '',
+      };
+    }
+    // Resultados reales indexados (sirven tanto para grupos como elim).
+    const realPorId = {};
+    for (const r of resultados) {
+      realPorId[r.partido_id] = { local: r.goles_local, visitante: r.goles_visitante };
+    }
+
+    for (const j of jugadores) {
+      const a = acc[j.id];
+      const desJug = (extra.desempates || []).filter((d) => d.jugador_id === j.id);
+
+      // Bonus de posición de grupo.
+      a.gruposClasificado = contarPosicionesAcertadas(
+        predGruposPorJug[j.id] || {}, desJug, realPorId
+      );
+      const bonusPos = bonusPosicionGrupos(
+        predGruposPorJug[j.id] || {}, desJug, realPorId, valorClasif
+      );
+      a.puntos += bonusPos;
+
+      // Puntos de eliminatoria.
+      const pe = puntosEliminatoria(
+        predElimPorJug[j.id] || {}, extra.cuadroElim || [], realPorId, valores
+      );
+      a.final1x2 = pe.final1x2;
+      a.finalExacto = pe.finalExacto;
+      a.finalClasificado = pe.finalClasificado;
+      a.puntos += pe.puntos;
+    }
+  }
+
   return Object.values(acc).sort((a, b) => b.puntos - a.puntos);
+}
+
+// Cuenta cuántas posiciones de grupo acertó (para la columna "Posic.").
+function contarPosicionesAcertadas(predPorId, desempatesJugador, realPorId) {
+  // Reutiliza la lógica del bonus pero contando aciertos, no puntos.
+  return bonusPosicionGrupos(predPorId, desempatesJugador, realPorId, 1);
 }
 
 /* Cuadrícula de un día: matrices de partidos x jugadores.

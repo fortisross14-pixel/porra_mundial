@@ -570,3 +570,66 @@ input:focus, select:focus {
   background: var(--azul);
   color: #fff;
 }
+
+/* ---- Navegación principal en la cinta azul oscuro ---- */
+.barra { flex-wrap: wrap; }
+.nav-principal {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  color: #aab0e8;
+  font-family: var(--cuerpo);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-item.activo { color: #fff; background: rgba(255,255,255,0.16); }
+
+/* ---- Cinta secundaria azul claro ---- */
+.sub-cinta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: #e8ebfb;
+  border: 1px solid #d2d8f3;
+  border-radius: 10px;
+  padding: 6px;
+  margin-bottom: 16px;
+}
+.sub-item {
+  background: transparent;
+  border: none;
+  color: var(--azul);
+  font-family: var(--titular);
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  padding: 9px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.sub-item:hover { background: #d8ddf6; }
+.sub-item.activo { background: var(--azul); color: #fff; }
+
+.cuenta-linea {
+  font-size: 14px;
+  color: var(--texto-tenue);
+  margin-bottom: 14px;
+}
+.cuenta-linea strong { color: var(--texto); }
+
+@media (max-width: 560px) {
+  .nav-principal { margin-left: 0; width: 100%; margin-top: 10px; }
+  .nav-item { flex: 1; justify-content: center; }
+}

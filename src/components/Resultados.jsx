@@ -7,6 +7,7 @@ import { RONDAS_ELIM } from '../lib/eliminatoria.js';
 import { NOMBRE_RONDA } from '../../data/eliminatoria.js';
 import Bandera from './Bandera.jsx';
 import Modal from './Modal.jsx';
+import SubCinta from './SubCinta.jsx';
 import TablaPuntos from './TablaPuntos.jsx';
 import DesgloseJugador from './DesglosesJugador.jsx';
 
@@ -37,24 +38,25 @@ export default function Resultados({ sesion, faseGrupos, faseElim }) {
 
   const valores = valoresDesdeFilas(datos.valores);
 
+  const sub2 = [
+    { id: 'resultados', texto: 'Resultados' },
+    { id: 'diarios', texto: 'Resultados diarios' },
+    { id: 'total', texto: 'Clasificación total' },
+  ];
+
   return (
     <>
+      <SubCinta items={sub2} activo={sub} alElegir={setSub} />
+
       <div className="tarjeta">
         <div className="fila-cuenta">
-          <h2 style={{ margin: 0 }}>Resultados</h2>
+          <h2 style={{ margin: 0 }}>
+            {sub2.find((s) => s.id === sub)?.texto}
+          </h2>
           <button className="btn-ayuda" onClick={() => setAyuda(true)} title="¿Cómo se puntúa?">
             ?
           </button>
         </div>
-      </div>
-
-      <div className="pestanas">
-        <button className={'pestana ' + (sub === 'resultados' ? 'activa' : '')}
-          onClick={() => setSub('resultados')}>Resultados</button>
-        <button className={'pestana ' + (sub === 'diarios' ? 'activa' : '')}
-          onClick={() => setSub('diarios')}>Resultados diarios</button>
-        <button className={'pestana ' + (sub === 'total' ? 'activa' : '')}
-          onClick={() => setSub('total')}>Clasificación total</button>
       </div>
 
       {sub === 'resultados' && <ResultadosPorSeccion datos={datos} faseElim={faseElim} />}
@@ -286,7 +288,14 @@ function ClasificacionTotal({ datos, valores }) {
     );
   }
 
-  const ranking = rankingTotal(datos.jugadores, datos.predicciones, datos.resultados, valores);
+  const ranking = rankingTotal(
+    datos.jugadores, datos.predicciones, datos.resultados, valores,
+    {
+      desempates: datos.desempates,
+      prediccionesElim: datos.prediccionesElim,
+      cuadroElim: datos.cuadroElim,
+    }
+  );
 
   return (
     <>

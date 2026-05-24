@@ -4,8 +4,32 @@ import MiPronostico from './components/MiPronostico.jsx';
 import Resultados from './components/Resultados.jsx';
 import Admin from './components/Admin.jsx';
 
-/* Cabecera: logo a la izquierda + "Porra Mundial" / "Mundial 2026". */
-function Barra() {
+/* Iconos sencillos en SVG (sin dependencias). */
+function IconoPronostico() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 11l3 3L22 4" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+  );
+}
+function IconoResultados() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M4 22h16" />
+      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+    </svg>
+  );
+}
+
+/* Cabecera: cinta azul oscuro con logo + navegación principal. */
+function Barra({ sesion, vista, setVista }) {
   const [logoFalla, setLogoFalla] = useState(false);
   return (
     <div className="barra">
@@ -19,12 +43,31 @@ function Barra() {
         <h1>Porra Mundial</h1>
         <div className="sub">Mundial 2026</div>
       </div>
+
+      {sesion && (
+        <nav className="nav-principal">
+          <button
+            className={'nav-item ' + (vista === 'pronostico' ? 'activo' : '')}
+            onClick={() => setVista('pronostico')}
+          >
+            <IconoPronostico />
+            <span>Mi pronóstico</span>
+          </button>
+          <button
+            className={'nav-item ' + (vista === 'resultados' ? 'activo' : '')}
+            onClick={() => setVista('resultados')}
+          >
+            <IconoResultados />
+            <span>Resultados</span>
+          </button>
+        </nav>
+      )}
     </div>
   );
 }
 
 export default function App() {
-  const [sesion, setSesion] = useState(null); // { codigo, porra, fases, jugador }
+  const [sesion, setSesion] = useState(null);
   const [vista, setVista] = useState('pronostico');
 
   const esAdmin = typeof window !== 'undefined' &&
@@ -42,55 +85,26 @@ export default function App() {
     );
   }
 
-  // Localiza las dos fases por su nombre.
   const faseGrupos = sesion?.fases.find((f) => /grupos/i.test(f.nombre));
   const faseElim = sesion?.fases.find((f) => /eliminatoria/i.test(f.nombre));
 
-  const tabs = [
-    ['pronostico', 'Mi pronóstico'],
-    ['resultados', 'Resultados'],
-  ];
-
   return (
     <>
-      <Barra />
+      <Barra sesion={sesion} vista={vista} setVista={setVista} />
       <div className="contenedor">
-        {!sesion && (
-          <Acceso alEntrar={(s) => setSesion(s)} />
-        )}
+        {!sesion && <Acceso alEntrar={(s) => setSesion(s)} />}
 
         {sesion && (
           <>
-            <div className="tarjeta">
-              <div className="fila-cuenta">
-                <span>
-                  <strong>{sesion.porra.nombre}</strong> · {sesion.jugador.usuario}
-                </span>
-              </div>
-              <div className="pestanas" style={{ marginTop: 12, marginBottom: 0 }}>
-                {tabs.map(([id, txt]) => (
-                  <button
-                    key={id}
-                    className={'pestana ' + (vista === id ? 'activa' : '')}
-                    onClick={() => setVista(id)}
-                  >{txt}</button>
-                ))}
-              </div>
+            <div className="cuenta-linea">
+              <strong>{sesion.porra.nombre}</strong> · {sesion.jugador.usuario}
             </div>
 
             {vista === 'pronostico' && (
-              <MiPronostico
-                sesion={sesion}
-                faseGrupos={faseGrupos}
-                faseElim={faseElim}
-              />
+              <MiPronostico sesion={sesion} faseGrupos={faseGrupos} faseElim={faseElim} />
             )}
             {vista === 'resultados' && (
-              <Resultados
-                sesion={sesion}
-                faseGrupos={faseGrupos}
-                faseElim={faseElim}
-              />
+              <Resultados sesion={sesion} faseGrupos={faseGrupos} faseElim={faseElim} />
             )}
           </>
         )}
