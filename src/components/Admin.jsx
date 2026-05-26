@@ -172,7 +172,7 @@ function PanelJugadores({ datos, recargar }) {
               <table className="tabla-grupo">
                 <thead>
                   <tr>
-                    <th>Jugador</th><th>Alta</th><th>Avance</th>
+                    <th>Jugador</th><th>PIN</th><th>Alta</th><th>Avance</th>
                     <th>Estado</th><th></th>
                   </tr>
                 </thead>
@@ -186,6 +186,9 @@ function PanelJugadores({ datos, recargar }) {
                     return (
                       <tr key={j.id}>
                         <td style={{ fontWeight: 600 }}>{j.usuario}</td>
+                        <td style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                          {j.pin}
+                        </td>
                         <td>{new Date(j.creado).toLocaleDateString('es-ES')}</td>
                         <td>{hechos}/{total}</td>
                         <td style={{ color: completo ? 'var(--verde)' : 'var(--dorado)', fontWeight: 700 }}>
@@ -320,6 +323,29 @@ function PanelResultados({ datos, recargar }) {
       setEstado('Error: ' + e.message);
     }
   }
+  async function borrarUno(pid) {
+    setEstado('');
+    try {
+      await api.adminBorrarResultado([pid]);
+      setBorrador((prev) => ({ ...prev, [pid]: {} }));
+      setEstado(`Resultado de ${pid} borrado.`);
+      await recargar();
+    } catch (e) {
+      setEstado('Error: ' + e.message);
+    }
+  }
+  async function borrarGrupo() {
+    setEstado('');
+    try {
+      const ids = partidosDeGrupo(grupo).map((p) => p.id);
+      await api.adminBorrarResultado(ids);
+      setBorrador({});
+      setEstado(`Resultados del Grupo ${grupo} borrados.`);
+      await recargar();
+    } catch (e) {
+      setEstado('Error: ' + e.message);
+    }
+  }
   return (
     <>
       <div className="pestanas">
@@ -329,7 +355,16 @@ function PanelResultados({ datos, recargar }) {
         ))}
       </div>
       <div className="tarjeta">
-        <h3>Resultados reales · Grupo {grupo}</h3>
+        <div className="fila-cuenta">
+          <h3 style={{ margin: 0 }}>Resultados reales · Grupo {grupo}</h3>
+          <button
+            className="btn-mini"
+            style={{ borderColor: 'var(--acento)', color: 'var(--acento)' }}
+            onClick={borrarGrupo}
+          >
+            Borrar resultados del grupo
+          </button>
+        </div>
         <p className="aviso info">
           Introduce el marcador real de cada partido y pulsa Guardar.
         </p>
@@ -353,6 +388,15 @@ function PanelResultados({ datos, recargar }) {
               <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 8, alignItems: 'center', marginTop: 4 }}>
                 {ya && <span style={{ fontSize: 12, color: 'var(--verde)', fontWeight: 700 }}>Guardado</span>}
                 <button className="btn-mini" onClick={() => guardar(p.id)}>Guardar</button>
+                {ya && (
+                  <button
+                    className="btn-mini"
+                    style={{ borderColor: 'var(--acento)', color: 'var(--acento)' }}
+                    onClick={() => borrarUno(p.id)}
+                  >
+                    Borrar
+                  </button>
+                )}
               </div>
             </div>
           );

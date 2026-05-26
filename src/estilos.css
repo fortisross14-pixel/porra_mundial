@@ -633,3 +633,24 @@ input:focus, select:focus {
   .nav-principal { margin-left: 0; width: 100%; margin-top: 10px; }
   .nav-item { flex: 1; justify-content: center; }
 }
+
+/* ---- Botón de grupo/cuadro completo (verde) ---- */
+.pestana.completa {
+  border-color: var(--verde);
+  color: var(--verde);
+}
+.pestana.completa.activa {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: #fff;
+}
+
+/* ---- Fila de jugador sin puntos en el día (rojo) ---- */
+.cuadricula tr.fila-cero td,
+.cuadricula tr.fila-cero .col-nombre {
+  color: var(--acento);
+}
+
+/* ---- Botón Salir en la cinta ---- */
+.nav-item.nav-salir { color: #d98a8a; }
+.nav-item.nav-salir:hover { color: #fff; background: rgba(216,38,47,0.35); }

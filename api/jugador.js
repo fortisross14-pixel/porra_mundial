@@ -19,8 +19,13 @@ export default async function handler(req, res) {
 
     const usuarioNorm = normalizar(usuario);
     if (!usuarioNorm) return error(res, 400, 'Falta el nombre de usuario');
-    if (!pin || String(pin).length < 3) {
-      return error(res, 400, 'El PIN debe tener al menos 3 dígitos');
+    // El PIN debe tener entre 5 y 8 caracteres alfanuméricos
+    // (letras y números, sin símbolos). Es sensible a mayúsculas.
+    if (modo === 'registrar' && !/^[A-Za-z0-9]{5,8}$/.test(String(pin || ''))) {
+      return error(res, 400, 'El PIN debe tener entre 5 y 8 letras o números (sin símbolos)');
+    }
+    if (!pin) {
+      return error(res, 400, 'Falta el PIN');
     }
 
     const { rows: existe } = await sql`

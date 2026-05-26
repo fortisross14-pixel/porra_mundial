@@ -44,6 +44,8 @@ export default async function handler(req, res) {
     let predicciones = [];
     let desempates = [];
     let cuadroHonor = [];
+    let prediccionesElim = [];
+    let cuadroElim = [];
     if (bloqueada) {
       const ids = jugadores.map((j) => j.id);
       if (ids.length) {
@@ -59,8 +61,26 @@ export default async function handler(req, res) {
           SELECT jugador_id, campo, valor FROM cuadro_honor
           WHERE jugador_id = ANY(${ids})
         `).rows;
+        // Predicciones de la fase eliminatoria (cualquier fase de esta
+        // porra cuyo nombre sea de eliminatoria).
+        const { rows: faseElim } = await sql`
+          SELECT id FROM fases
+          WHERE porra_id = ${porra.id} AND nombre ILIKE '%eliminatoria%'
+          ORDER BY id LIMIT 1
+        `;
+        if (faseElim[0]) {
+          prediccionesElim = (await sql`
+            SELECT jugador_id, partido_id, goles_local, goles_visitante, penaltis
+            FROM predicciones WHERE fase_id = ${faseElim[0].id}
+          `).rows;
+        }
       }
     }
+    // El cuadro eliminatorio resuelto por el admin (siempre, para poder
+    // calcular los puntos de la fase final).
+    cuadroElim = (await sql`
+      SELECT partido_id, lado, equipo FROM cuadro_eliminatorio
+    `).rows;
 
     return res.status(200).json({
       ok: true,
@@ -73,6 +93,8 @@ export default async function handler(req, res) {
       cuadroHonorValor: chValor[0]?.puntos ?? 10,
       cuadroHonorCorrecto: chCorrecto,
       cuadroHonor,
+      prediccionesElim,
+      cuadroElim,
     });
   } catch (e) {
     return error(res, 500, 'Error del servidor: ' + e.message);

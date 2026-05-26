@@ -83,6 +83,12 @@ export const api = {
       body: JSON.stringify({ accion: 'borrarJugador', jugadorId }),
     }),
 
+  adminBorrarResultado: (partidoIds) =>
+    pedir('/api/admin', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'borrarResultado', partidoIds }),
+    }),
+
   puntos: () => pedir('/api/puntos'),
 
   ranking: (codigo, faseId) =>

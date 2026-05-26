@@ -28,8 +28,19 @@ function IconoResultados() {
   );
 }
 
+function IconoSalir() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
+
 /* Cabecera: cinta azul oscuro con logo + navegación principal. */
-function Barra({ sesion, vista, setVista }) {
+function Barra({ sesion, vista, setVista, alSalir }) {
   const [logoFalla, setLogoFalla] = useState(false);
   return (
     <div className="barra">
@@ -60,15 +71,43 @@ function Barra({ sesion, vista, setVista }) {
             <IconoResultados />
             <span>Resultados</span>
           </button>
+          <button className="nav-item nav-salir" onClick={alSalir}>
+            <IconoSalir />
+            <span>Salir</span>
+          </button>
         </nav>
       )}
     </div>
   );
 }
 
+// Clave de almacenamiento de la sesión del jugador en el navegador.
+const CLAVE_SESION = 'porra_sesion';
+
+// Lee la sesión guardada (si la hay) para no tener que volver a entrar.
+function leerSesionGuardada() {
+  try {
+    const txt = localStorage.getItem(CLAVE_SESION);
+    return txt ? JSON.parse(txt) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
-  const [sesion, setSesion] = useState(null);
+  const [sesion, setSesion] = useState(leerSesionGuardada);
   const [vista, setVista] = useState('pronostico');
+
+  // Guarda o entra: persiste la sesión en el navegador.
+  function entrar(s) {
+    setSesion(s);
+    try { localStorage.setItem(CLAVE_SESION, JSON.stringify(s)); } catch { /* ignora */ }
+  }
+  // Salir: borra la sesión guardada y vuelve a la pantalla de acceso.
+  function salir() {
+    setSesion(null);
+    try { localStorage.removeItem(CLAVE_SESION); } catch { /* ignora */ }
+  }
 
   const esAdmin = typeof window !== 'undefined' &&
     window.location.pathname.replace(/\/$/, '') === '/admin';
@@ -90,9 +129,9 @@ export default function App() {
 
   return (
     <>
-      <Barra sesion={sesion} vista={vista} setVista={setVista} />
+      <Barra sesion={sesion} vista={vista} setVista={setVista} alSalir={salir} />
       <div className="contenedor">
-        {!sesion && <Acceso alEntrar={(s) => setSesion(s)} />}
+        {!sesion && <Acceso alEntrar={entrar} />}
 
         {sesion && (
           <>

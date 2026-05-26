@@ -242,23 +242,34 @@ function ResultadosDiarios({ datos, valores }) {
                   <td className="col-pts">—</td>
                 </tr>
                 {/* Filas de jugadores */}
-                {cuad.filas.map((fila) => (
-                  <tr key={fila.jugadorId}>
-                    <td className="col-nombre">{fila.usuario}</td>
-                    {cuad.partidos.map((p) => {
-                      const celda = fila.celdas[p.id];
-                      return (
-                        <td
-                          key={p.id}
-                          style={{ color: colorCelda(celda.tipo), fontWeight: 600 }}
-                        >
-                          {textoPred(celda)}
-                        </td>
-                      );
-                    })}
-                    <td className="col-pts">{fila.puntos}</td>
-                  </tr>
-                ))}
+                {(() => {
+                  // ¿Hay algún resultado real este día? Solo entonces
+                  // tiene sentido marcar en rojo a quien lleva 0 puntos.
+                  const hayResultados = cuad.partidos.some((p) => cuad.reales[p.id]);
+                  return cuad.filas.map((fila) => {
+                    const ceroPuntos = hayResultados && fila.puntos === 0;
+                    return (
+                      <tr key={fila.jugadorId} className={ceroPuntos ? 'fila-cero' : ''}>
+                        <td className="col-nombre">{fila.usuario}</td>
+                        {cuad.partidos.map((p) => {
+                          const celda = fila.celdas[p.id];
+                          return (
+                            <td
+                              key={p.id}
+                              style={{
+                                color: ceroPuntos ? 'var(--acento)' : colorCelda(celda.tipo),
+                                fontWeight: 600,
+                              }}
+                            >
+                              {textoPred(celda)}
+                            </td>
+                          );
+                        })}
+                        <td className="col-pts">{fila.puntos}</td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           </div>

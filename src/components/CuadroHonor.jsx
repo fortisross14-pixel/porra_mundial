@@ -1,24 +1,33 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
+import { EQUIPOS, nombreEquipo } from '../../data/partidos.js';
 
-/* Cuadro de honor: 6 campos de texto que el jugador rellena.
- * Cada acierto vale los puntos definidos en el admin (por defecto 10).
+/* Cuadro de honor: 6 campos que el jugador rellena.
+ *  - Campeón, Subcampeón, 3.º y 4.º: equipo elegido de un desplegable.
+ *  - Máximo goleador y Mejor jugador: texto libre (son jugadores, no
+ *    equipos, y no hay lista de jugadores en la app).
+ * Cada acierto vale los puntos definidos en el admin.
  */
 const CAMPOS = [
-  ['campeon', 'Campeón'],
-  ['subcampeon', 'Subcampeón'],
-  ['tercero', 'Tercer clasificado'],
-  ['cuarto', 'Cuarto clasificado'],
-  ['goleador', 'Máximo goleador'],
-  ['mejor_jugador', 'Mejor jugador'],
+  ['campeon', 'Campeón', 'equipo'],
+  ['subcampeon', 'Subcampeón', 'equipo'],
+  ['tercero', 'Tercer clasificado', 'equipo'],
+  ['cuarto', 'Cuarto clasificado', 'equipo'],
+  ['goleador', 'Máximo goleador', 'texto'],
+  ['mejor_jugador', 'Mejor jugador', 'texto'],
 ];
 
-export default function CuadroHonor({ sesion, fase }) {
+export default function CuadroHonor({ sesion, fase, alGuardar }) {
   const [respuestas, setRespuestas] = useState({});
   const [estado, setEstado] = useState(null);
   const [cargando, setCargando] = useState(true);
 
   const bloqueada = !fase.abierta;
+
+  // Equipos ordenados por nombre, para los desplegables.
+  const equipos = Object.keys(EQUIPOS).sort((a, b) =>
+    nombreEquipo(a).localeCompare(nombreEquipo(b), 'es')
+  );
 
   useEffect(() => {
     (async () => {
@@ -43,6 +52,7 @@ export default function CuadroHonor({ sesion, fase }) {
     try {
       await api.guardarCuadroHonor(sesion.codigo, sesion.jugador.id, respuestas);
       setEstado({ tipo: 'ok', texto: 'Cuadro de honor guardado.' });
+      if (alGuardar) alGuardar(); // refresca el color del botón
     } catch (e) {
       setEstado({ tipo: 'error', texto: 'Error al guardar: ' + e.message });
     }
@@ -57,15 +67,28 @@ export default function CuadroHonor({ sesion, fase }) {
         Rellena tus apuestas para el final del torneo. Cada acierto suma
         puntos. El organizador valida las respuestas al terminar el Mundial.
       </p>
-      {CAMPOS.map(([id, etiqueta]) => (
+      {CAMPOS.map(([id, etiqueta, tipo]) => (
         <div key={id}>
           <label>{etiqueta}</label>
-          <input
-            value={respuestas[id] || ''}
-            disabled={bloqueada}
-            onChange={(e) => fijar(id, e.target.value)}
-            placeholder={etiqueta + '…'}
-          />
+          {tipo === 'equipo' ? (
+            <select
+              value={respuestas[id] || ''}
+              disabled={bloqueada}
+              onChange={(e) => fijar(id, e.target.value)}
+            >
+              <option value="">— Elige un equipo —</option>
+              {equipos.map((c) => (
+                <option key={c} value={c}>{nombreEquipo(c)}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={respuestas[id] || ''}
+              disabled={bloqueada}
+              onChange={(e) => fijar(id, e.target.value)}
+              placeholder={etiqueta + '…'}
+            />
+          )}
         </div>
       ))}
       {!bloqueada && (

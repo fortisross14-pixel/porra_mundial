@@ -93,12 +93,11 @@ export default function Acceso({ alEntrar }) {
             placeholder="Como te conoce la gente"
           />
 
-          <label>Tu PIN {modo === 'registrar' && '(elige uno, 3-6 dígitos)'}</label>
+          <label>Tu PIN {modo === 'registrar' && '(elige uno, 5-8 letras o números)'}</label>
           <input
             value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="••••"
-            inputMode="numeric"
+            onChange={(e) => setPin(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 8))}
+            placeholder="PIN"
             onKeyDown={(e) => e.key === 'Enter' && identificarse()}
           />
           <p className="aviso info">

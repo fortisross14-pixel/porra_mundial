@@ -168,3 +168,17 @@ penaltis). Después:
   "Fase final" del ranking (ahora siguen a 0).
 - Cálculo del bonus por posición de grupo (columna "Posic.").
 - Pantalla de admin para validar el cuadro de honor al final.
+
+## Puntuación completa (sesión final)
+
+Ya se calculan TODOS los puntos en la "Clasificación total":
+- Columna "Posic." (grupos): por cada equipo que el jugador coloca
+  en su posición exacta de la tabla final del grupo. Solo cuenta
+  cuando el grupo tiene los 6 resultados.
+- Columnas "Fase final": puntos de la eliminatoria.
+  - 1X2 y exacto se puntúan POR CRUCE comparando marcadores (los
+    equipos no importan: si aciertas el 2-1 de un cruce, puntúas).
+  - "Clasificado" se puntúa por el equipo que el jugador hace
+    avanzar en cada cruce frente al que avanzó de verdad.
+
+No hay cambios de base de datos en esta sesión.

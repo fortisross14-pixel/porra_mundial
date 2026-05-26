@@ -8,7 +8,7 @@ import Bandera from './Bandera.jsx';
  *  - Pestañas de grupo (A-L) arriba; se ve un grupo cada vez.
  *  - Al guardar, si faltan partidos, avisa "Faltan partidos por pronosticar".
  */
-export default function Pronostico({ sesion, fase, grupoExterno }) {
+export default function Pronostico({ sesion, fase, grupoExterno, alGuardar }) {
   const [predicciones, setPredicciones] = useState({}); // partidoId -> {golesLocal, golesVisitante}
   const [desempates, setDesempates] = useState({});      // "grupo:X|clave" -> [equipos...]
   const [estado, setEstado] = useState(null);            // { tipo, texto }
@@ -99,6 +99,7 @@ export default function Pronostico({ sesion, fase, grupoExterno }) {
       } else {
         setEstado({ tipo: 'ok', texto: 'Pronóstico completo y guardado correctamente.' });
       }
+      if (alGuardar) alGuardar(); // refresca el color de los botones de grupo
     } catch (e) {
       setEstado({ tipo: 'error', texto: 'Error al guardar: ' + e.message });
     }

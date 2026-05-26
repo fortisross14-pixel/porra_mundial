@@ -37,6 +37,17 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    if (accion === 'borrarResultado') {
+      // Borra el resultado real de uno o varios partidos.
+      // partidoIds = lista de ids de partido a limpiar (un partido o
+      // un grupo entero). El partido vuelve a quedar sin marcador.
+      const { partidoIds } = cuerpo;
+      if (Array.isArray(partidoIds) && partidoIds.length) {
+        await sql`DELETE FROM resultados WHERE partido_id = ANY(${partidoIds})`;
+      }
+      return res.status(200).json({ ok: true });
+    }
+
     if (accion === 'fase') {
       // Bloqueo/desbloqueo manual de una fase.
       const { faseId, abierta } = cuerpo;
