@@ -58,7 +58,7 @@ export default function Acceso({ alEntrar }) {
           <input
             value={codigo}
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-            placeholder="EJ: FAMILIA2026"
+            placeholder="EJ: PORRA2026"
             onKeyDown={(e) => e.key === 'Enter' && validarCodigo()}
           />
           {error && <div className="aviso error">{error}</div>}
