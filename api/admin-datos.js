@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       SELECT id, porra_id, nombre, fecha_limite, abierta FROM fases ORDER BY id
     `;
     const { rows: jugadores } = await sql`
-      SELECT id, porra_id, usuario, pin, creado FROM jugadores ORDER BY creado
+      SELECT id, porra_id, usuario, creado FROM jugadores ORDER BY creado
     `;
     // Nº de partidos pronosticados (con ambos goles) por jugador y fase.
     const { rows: conteos } = await sql`

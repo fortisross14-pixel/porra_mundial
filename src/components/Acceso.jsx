@@ -15,6 +15,10 @@ export default function Acceso({ alEntrar }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
+  // Paso extra: el jugador entró con el PIN temporal 00000 y debe
+  // elegir uno nuevo. Guardamos su jugador mientras tanto.
+  const [pinTemporal, setPinTemporal] = useState(null); // jugador pendiente
+  const [pinNuevo, setPinNuevo] = useState('');
 
   async function validarCodigo() {
     setError(''); setCargando(true);
@@ -37,7 +41,26 @@ export default function Acceso({ alEntrar }) {
         modo === 'registrar'
           ? await api.registrar(codigo.trim(), usuario, pin)
           : await api.entrar(codigo.trim(), usuario, pin);
-      alEntrar({ codigo: codigo.trim(), porra, fases, jugador: r.jugador });
+      // Si el PIN era el temporal 00000, pasa al paso de elegir uno nuevo.
+      if (r.debeCambiarPin) {
+        setPinTemporal(r.jugador);
+        setPaso(3);
+      } else {
+        alEntrar({ codigo: codigo.trim(), porra, fases, jugador: r.jugador });
+      }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  async function fijarPinNuevo() {
+    setError(''); setCargando(true);
+    try {
+      // Cambia el PIN temporal (00000) por el nuevo que elige el jugador.
+      await api.cambiarPin(codigo.trim(), pinTemporal.id, '00000', pinNuevo);
+      alEntrar({ codigo: codigo.trim(), porra, fases, jugador: pinTemporal });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -58,7 +81,7 @@ export default function Acceso({ alEntrar }) {
           <input
             value={codigo}
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-            placeholder="EJ: PORRA2026"
+            placeholder="EJ: FAMILIA2026"
             onKeyDown={(e) => e.key === 'Enter' && validarCodigo()}
           />
           {error && <div className="aviso error">{error}</div>}
@@ -120,6 +143,28 @@ export default function Acceso({ alEntrar }) {
             onClick={() => { setPaso(1); setError(''); }}
           >
             ← Cambiar de porra
+          </button>
+        </>
+      )}
+
+      {paso === 3 && (
+        <>
+          <h2>Elige tu nuevo PIN</h2>
+          <p className="aviso info">
+            Hola {pinTemporal?.usuario}. Tu PIN actual (00000) es
+            temporal porque lo reseteó el organizador. Elige uno nuevo
+            para continuar.
+          </p>
+          <label>Nuevo PIN (5-8 letras o números)</label>
+          <input
+            value={pinNuevo}
+            onChange={(e) => setPinNuevo(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 8))}
+            placeholder="Nuevo PIN"
+            onKeyDown={(e) => e.key === 'Enter' && fijarPinNuevo()}
+          />
+          {error && <div className="aviso error">{error}</div>}
+          <button className="btn fila" onClick={fijarPinNuevo} disabled={cargando}>
+            {cargando ? 'Guardando…' : 'Guardar y entrar'}
           </button>
         </>
       )}

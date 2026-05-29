@@ -29,6 +29,12 @@ export const api = {
       body: JSON.stringify({ codigo, modo: 'entrar', usuario, pin }),
     }),
 
+  cambiarPin: (codigo, jugadorId, pinActual, pinNuevo) =>
+    pedir('/api/jugador', {
+      method: 'POST',
+      body: JSON.stringify({ codigo, modo: 'cambiarPin', jugadorId, pinActual, pinNuevo }),
+    }),
+
   cargarPronostico: (codigo, jugadorId, faseId) =>
     pedir(
       `/api/pronostico?codigo=${encodeURIComponent(codigo)}&jugadorId=${jugadorId}&faseId=${faseId}`
@@ -81,6 +87,12 @@ export const api = {
     pedir('/api/admin', {
       method: 'POST',
       body: JSON.stringify({ accion: 'borrarJugador', jugadorId }),
+    }),
+
+  adminResetearPin: (jugadorId) =>
+    pedir('/api/admin', {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'resetearPin', jugadorId }),
     }),
 
   adminBorrarResultado: (partidoIds) =>

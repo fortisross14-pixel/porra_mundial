@@ -17,6 +17,27 @@ export default async function handler(req, res) {
     const porra = await porraPorCodigo(codigo);
     if (!porra) return error(res, 403, 'Código no válido');
 
+    // Cambiar PIN: el jugador ya identificado cambia su propio PIN.
+    // Se trata antes que el resto porque no envía 'usuario'.
+    if (modo === 'cambiarPin') {
+      const { jugadorId, pinActual, pinNuevo } = leerCuerpo(req);
+      if (!/^[A-Za-z0-9]{5,8}$/.test(String(pinNuevo || ''))) {
+        return error(res, 400, 'El PIN nuevo debe tener entre 5 y 8 letras o números');
+      }
+      if (String(pinNuevo) === '00000') {
+        return error(res, 400, 'Ese PIN no está permitido, elige otro');
+      }
+      const { rows } = await sql`
+        SELECT pin FROM jugadores WHERE id = ${jugadorId} AND porra_id = ${porra.id}
+      `;
+      if (!rows.length) return error(res, 404, 'Jugador no encontrado');
+      if (rows[0].pin !== String(pinActual)) {
+        return error(res, 403, 'El PIN actual no es correcto');
+      }
+      await sql`UPDATE jugadores SET pin = ${String(pinNuevo)} WHERE id = ${jugadorId}`;
+      return res.status(200).json({ ok: true });
+    }
+
     const usuarioNorm = normalizar(usuario);
     if (!usuarioNorm) return error(res, 400, 'Falta el nombre de usuario');
     // El PIN debe tener entre 5 y 8 caracteres alfanuméricos
@@ -52,10 +73,24 @@ export default async function handler(req, res) {
       if (existe[0].pin !== String(pin)) {
         return error(res, 403, 'PIN incorrecto');
       }
+      // Si el PIN es el temporal '00000', el jugador entra pero debe
+      // elegir un PIN nuevo antes de continuar.
+      if (existe[0].pin === '00000') {
+        return res.status(200).json({
+          ok: true,
+          debeCambiarPin: true,
+          jugador: { id: existe[0].id, usuario: existe[0].usuario },
+        });
+      }
       return res.status(200).json({
         ok: true,
         jugador: { id: existe[0].id, usuario: existe[0].usuario },
       });
+    }
+
+    if (modo === 'cambiarPin') {
+      // (ya tratado arriba)
+      return error(res, 400, 'Modo no válido');
     }
 
     return error(res, 400, 'Modo no válido');

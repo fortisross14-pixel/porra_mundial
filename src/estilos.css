@@ -491,11 +491,34 @@ input:focus, select:focus {
   z-index: 1;
 }
 .cuadricula thead .col-nombre { background: #fff; z-index: 2; }
+
+/* Columna de ranking (posición del día) */
+.cuadricula .col-rank {
+  width: 30px;
+  min-width: 30px;
+  font-family: var(--titular);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--texto-tenue);
+}
+
+/* Columna de PUNTOS: es lo que el jugador viene a ver, así que
+   se destaca con franja de color y números grandes. */
 .cuadricula .col-pts {
   font-family: var(--titular);
   font-weight: 700;
+  font-size: 17px;
   color: var(--azul);
+  background: #eef0fb;
+  border-left: 2px solid var(--borde);
+  min-width: 52px;
 }
+.cuadricula thead .col-pts {
+  font-size: 11px;
+  color: var(--azul);
+  background: #e3e6f7;
+}
+
 /* Fila del resultado real, destacada */
 .cuadricula .fila-real td {
   background: #eef0fb;
@@ -506,6 +529,25 @@ input:focus, select:focus {
   background: #eef0fb;
   text-transform: uppercase;
   font-size: 12px;
+}
+.cuadricula .fila-real .col-pts {
+  background: #e3e6f7;
+}
+
+/* Líder del día: fila con tinte dorado suave */
+.cuadricula tr.fila-lider td {
+  background: #fdf6e3;
+}
+.cuadricula tr.fila-lider .col-nombre {
+  background: #fdf6e3;
+  color: var(--azul);
+}
+.cuadricula tr.fila-lider .col-pts {
+  background: #f6e8bf;
+  color: #8a6d1a;
+}
+.cuadricula tr.fila-lider .col-rank {
+  color: #b8901f;
 }
 
 /* ---- Cruce del cuadro eliminatorio (admin) ---- */
@@ -654,3 +696,18 @@ input:focus, select:focus {
 /* ---- Botón Salir en la cinta ---- */
 .nav-item.nav-salir { color: #d98a8a; }
 .nav-item.nav-salir:hover { color: #fff; background: rgba(216,38,47,0.35); }
+
+/* ---- Enlace "Cambiar PIN" en la línea de cuenta ---- */
+.enlace-pin {
+  background: none;
+  border: none;
+  color: var(--azul);
+  font-family: var(--cuerpo);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 10px;
+  padding: 0;
+}
+.enlace-pin:hover { color: var(--azul-claro); }

@@ -129,7 +129,8 @@ function PanelAdmin({ alSalir }) {
 /* ---------- Jugadores: lista por porra (muestra el CÓDIGO) ---------- */
 function PanelJugadores({ datos, recargar }) {
   const total = PARTIDOS.length;
-  const [confirmar, setConfirmar] = useState(null); // jugadorId pendiente
+  const [confirmar, setConfirmar] = useState(null); // jugador pendiente de borrar
+  const [resetear, setResetear] = useState(null);   // jugador pendiente de reset
   const [estado, setEstado] = useState('');
 
   async function borrar(jugadorId) {
@@ -138,6 +139,19 @@ function PanelJugadores({ datos, recargar }) {
       await api.adminBorrarJugador(jugadorId);
       setConfirmar(null);
       setEstado('Jugador eliminado.');
+      await recargar();
+    } catch (e) {
+      setEstado('Error: ' + e.message);
+    }
+  }
+
+  async function confirmarReset() {
+    setEstado('');
+    try {
+      await api.adminResetearPin(resetear.id);
+      const nombre = resetear.usuario;
+      setResetear(null);
+      setEstado(`PIN de ${nombre} reseteado. Dile que entre con su nombre y el PIN 00000; el sistema le pedirá uno nuevo.`);
       await recargar();
     } catch (e) {
       setEstado('Error: ' + e.message);
@@ -186,8 +200,8 @@ function PanelJugadores({ datos, recargar }) {
                     return (
                       <tr key={j.id}>
                         <td style={{ fontWeight: 600 }}>{j.usuario}</td>
-                        <td style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}>
-                          {j.pin}
+                        <td style={{ fontFamily: 'monospace', letterSpacing: '0.1em' }}>
+                          ••••••
                         </td>
                         <td>{new Date(j.creado).toLocaleDateString('es-ES')}</td>
                         <td>{hechos}/{total}</td>
@@ -195,13 +209,21 @@ function PanelJugadores({ datos, recargar }) {
                           {completo ? 'Completo' : 'Incompleto'}
                         </td>
                         <td>
-                          <button
-                            className="btn-mini"
-                            style={{ borderColor: 'var(--acento)', color: 'var(--acento)' }}
-                            onClick={() => setConfirmar(j)}
-                          >
-                            Borrar
-                          </button>
+                          <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                            <button
+                              className="btn-mini"
+                              onClick={() => setResetear(j)}
+                            >
+                              Resetear PIN
+                            </button>
+                            <button
+                              className="btn-mini"
+                              style={{ borderColor: 'var(--acento)', color: 'var(--acento)' }}
+                              onClick={() => setConfirmar(j)}
+                            >
+                              Borrar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -212,6 +234,27 @@ function PanelJugadores({ datos, recargar }) {
           </div>
         );
       })}
+
+      {resetear && (
+        <div className="tarjeta">
+          <div className="zona-peligro">
+            <strong>¿Resetear el PIN de {resetear.usuario}?</strong>
+            <p style={{ fontSize: 13, margin: '6px 0 10px' }}>
+              Su PIN pasará a ser <code>00000</code>. La próxima vez que
+              entre con su nombre y <code>00000</code>, el sistema le
+              pedirá que elija un PIN nuevo.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn" onClick={confirmarReset}>
+                Sí, resetear PIN
+              </button>
+              <button className="btn secundario" onClick={() => setResetear(null)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirmar && (
         <div className="tarjeta">

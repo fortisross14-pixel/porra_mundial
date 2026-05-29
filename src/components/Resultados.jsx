@@ -220,6 +220,7 @@ function ResultadosDiarios({ datos, valores }) {
             <table className="cuadricula">
               <thead>
                 <tr>
+                  <th className="col-rank"></th>
                   <th className="col-nombre">Jugador</th>
                   {cuad.partidos.map((p) => (
                     <th key={p.id}>{p.etiqueta}</th>
@@ -230,6 +231,7 @@ function ResultadosDiarios({ datos, valores }) {
               <tbody>
                 {/* Fila de resultados reales */}
                 <tr className="fila-real">
+                  <td className="col-rank"></td>
                   <td className="col-nombre">Resultado final</td>
                   {cuad.partidos.map((p) => {
                     const r = cuad.reales[p.id];
@@ -241,15 +243,22 @@ function ResultadosDiarios({ datos, valores }) {
                   })}
                   <td className="col-pts">—</td>
                 </tr>
-                {/* Filas de jugadores */}
+                {/* Filas de jugadores, ordenadas por puntos */}
                 {(() => {
-                  // ¿Hay algún resultado real este día? Solo entonces
-                  // tiene sentido marcar en rojo a quien lleva 0 puntos.
                   const hayResultados = cuad.partidos.some((p) => cuad.reales[p.id]);
-                  return cuad.filas.map((fila) => {
+                  // Puntuación máxima del día (para destacar al líder).
+                  const maxPts = cuad.filas.reduce((m, f) => Math.max(m, f.puntos), 0);
+                  return cuad.filas.map((fila, idx) => {
                     const ceroPuntos = hayResultados && fila.puntos === 0;
+                    const esLider = hayResultados && maxPts > 0 && fila.puntos === maxPts;
                     return (
-                      <tr key={fila.jugadorId} className={ceroPuntos ? 'fila-cero' : ''}>
+                      <tr
+                        key={fila.jugadorId}
+                        className={
+                          (ceroPuntos ? 'fila-cero ' : '') + (esLider ? 'fila-lider' : '')
+                        }
+                      >
+                        <td className="col-rank">{idx + 1}</td>
                         <td className="col-nombre">{fila.usuario}</td>
                         {cuad.partidos.map((p) => {
                           const celda = fila.celdas[p.id];

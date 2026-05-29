@@ -86,6 +86,14 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    if (accion === 'resetearPin') {
+      // Resetea el PIN de un jugador al valor temporal '00000'.
+      // La próxima vez que entre, el sistema le pedirá uno nuevo.
+      const { jugadorId } = cuerpo;
+      await sql`UPDATE jugadores SET pin = '00000' WHERE id = ${jugadorId}`;
+      return res.status(200).json({ ok: true });
+    }
+
     if (accion === 'borrarJugador') {
       // Borra UN jugador concreto y todo lo suyo (predicciones,
       // desempates, cuadro de honor). La porra y el resto de
